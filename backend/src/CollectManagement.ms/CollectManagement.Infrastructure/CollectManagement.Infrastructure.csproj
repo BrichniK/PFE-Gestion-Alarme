@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\CollectManagement.Application\CollectManagement.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Hangfire" Version="1.8.18" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
+    <PackageReference Include="HtmlToOpenXml.dll" Version="3.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
+    <PackageReference Include="MQTTnet.AspNetCore" Version="5.0.1.1416" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="PasswordGenerator" Version="2.1.0" />
+    <PackageReference Include="PDFsharp" Version="6.2.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="21.0.22" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interceptors\" />
+    <Folder Include="Persistence\Repositories\AlerteRepositories\" />
+    <Folder Include="Persistence\Repositories\ConfigurationGeneraleRepositories\" />
+    <Folder Include="Persistence\Repositories\DeviceRepositories\" />
+    <Folder Include="Persistence\Repositories\EmployeeRepositories\" />
+    <Folder Include="Persistence\Repositories\GroupeRepositories\" />
+    <Folder Include="Persistence\Repositories\JourFerieRepositories\" />
+    <Folder Include="Persistence\Repositories\MaintenanceRepositories\" />
+    <Folder Include="Persistence\Repositories\PlanningRepositories\" />
+    <Folder Include="Persistence\Repositories\ShiftRepositories\" />
+    <Folder Include="Persistence\Repositories\SMSConfigurationRepositories\" />
+    <Folder Include="Persistence\Repositories\SMSRepositories\" />
+    <Folder Include="Persistence\Repositories\SocieteRepositories\" />
+    <Folder Include="Persistence\Repositories\TypeRepositories\" />
+    <Folder Include="Persistence\Repositories\UtilisateurRepositories\" />
+  </ItemGroup>
+</Project>

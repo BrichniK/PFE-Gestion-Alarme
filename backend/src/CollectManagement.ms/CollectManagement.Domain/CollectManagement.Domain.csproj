@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <Folder Include="Alertes\Entities\" />
+    <Folder Include="Alertes\Enums\" />
+    <Folder Include="Devices\Entities\" />
+    <Folder Include="Devices\Enums\" />
+    <Folder Include="Devices\ValueObjects\" />
+    <Folder Include="Employess\Entities\" />
+    <Folder Include="Employess\Enums\" />
+    <Folder Include="Groupes\Entities\" />
+    <Folder Include="Groupes\Enums\" />
+    <Folder Include="Maintenances\Entities\" />
+    <Folder Include="Maintenances\Enums\" />
+    <Folder Include="Maintenances\ValueObjects\" />
+    <Folder Include="Plannings\Entities\" />
+    <Folder Include="Plannings\Enums\" />
+    <Folder Include="Plannings\ValueObjects\" />
+    <Folder Include="Societes\Entities\" />
+    <Folder Include="Societes\Enums\" />
+  </ItemGroup>
+</Project>

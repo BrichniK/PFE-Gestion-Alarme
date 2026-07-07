@@ -1,0 +1,6 @@
+@CollectManagement.WebAPI_HostAddress = http://localhost:6064
+
+GET {{CollectManagement.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

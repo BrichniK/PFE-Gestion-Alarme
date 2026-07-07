@@ -1,0 +1,3 @@
+namespace CollectManagement.Application.Features.ConfigurationGenerales.Queries.GetConfigurationGenerale;
+
+public record GetConfigurationGeneraleQuery() : IRequest<GetConfigurationGeneraleResponse>;

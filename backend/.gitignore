@@ -1,0 +1,7 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+src/CollectManagement.ms/CollectManagement.WebAPI/appsettings.json
+src/CollectManagement.ms/CollectManagement.WebAPI/appsettings.Development.json

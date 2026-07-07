@@ -1,0 +1,3 @@
+namespace CollectManagement.Application.Features.ConfigurationGenerales.Commands.UpdateConfigurationGenerale;
+
+public record UpdateConfigurationGeneraleResponse(Ulid ConfigurationGeneraleId);
