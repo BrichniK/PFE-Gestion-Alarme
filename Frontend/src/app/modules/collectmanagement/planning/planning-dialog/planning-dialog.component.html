@@ -1,0 +1,159 @@
+<div class="planning-dialog-shell" *transloco="let t">
+
+    <!-- Header -->
+    <div class="pd-header">
+        <button type="button" mat-icon-button (click)="close()" tabindex="-1" class="pd-close-btn">
+            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </button>
+
+        <div class="pd-header-content">
+            <div class="pd-header-icon">
+                <mat-icon class="icon-size-6" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+            </div>
+            <div class="pd-header-text">
+                <h2 class="pd-title">
+                    {{ form.get('planningId')?.value === 'new' ? t('Nouvelle affectation') : t('Modifier l\'affectation') }}
+                </h2>
+                <div class="pd-subtitle">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:clock'"></mat-icon>
+                    {{ date | date:'EEEE d MMMM yyyy':'':'fr' }}
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="selectedDates.length > 1" class="pd-multiday">
+            <span class="pd-multiday-dot">
+                <span class="pd-multiday-ping"></span>
+                <span class="pd-multiday-core"></span>
+            </span>
+            <span class="pd-multiday-label">{{ selectedDates.length }} {{ t('jours sélectionnés') }}</span>
+            <span class="pd-multiday-dates">
+                <ng-container *ngFor="let selected of selectedDates; let last = last; let i = index">
+                    <ng-container *ngIf="i < 8">{{ selected | date:'dd/MM':'':'fr' }}<span *ngIf="!last && i < 7">, </span></ng-container>
+                </ng-container>
+                <span *ngIf="selectedDates.length > 8">…</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="pd-body">
+        <form [formGroup]="form" class="pd-form">
+
+            <!-- Affectation Section -->
+            <div class="pd-section">
+                <div class="pd-section-header">
+                    <div class="pd-section-indicator pd-indicator-primary"></div>
+                    <h3 class="pd-section-title">{{ t('Qui affecter ?') }}</h3>
+                </div>
+
+                <!-- Toggle -->
+                <div class="pd-toggle">
+                    <button type="button" class="pd-toggle-btn" [class.is-active]="assignMode === 'group'" (click)="assignMode = 'group'">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                        <span>{{ t('Groupes') }}</span>
+                        <span *ngIf="form.get('groupeIds')?.value?.length > 0" class="pd-toggle-badge">{{ form.get('groupeIds')?.value?.length }}</span>
+                    </button>
+                    <button type="button" class="pd-toggle-btn" [class.is-active]="assignMode === 'employee'" (click)="assignMode = 'employee'">
+                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                        <span>{{ t('Employés') }}</span>
+                        <span *ngIf="form.get('employeeIds')?.value?.length > 0" class="pd-toggle-badge">{{ form.get('employeeIds')?.value?.length }}</span>
+                    </button>
+                </div>
+
+                <!-- Groups -->
+                <div *ngIf="assignMode === 'group'" class="pd-card-grid">
+                    <button type="button" *ngFor="let groupe of groupes" class="pd-card pd-card-group"
+                        [class.is-selected]="isGroupeSelected(groupe.groupeId)"
+                        (click)="toggleGroupe(groupe.groupeId)">
+                        <span class="pd-card-color" [style.background-color]="groupe.color || '#94a3b8'"></span>
+                        <span class="pd-card-label">{{ groupe.nom }}</span>
+                        <mat-icon *ngIf="isGroupeSelected(groupe.groupeId)" class="pd-card-check icon-size-5" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    </button>
+                    <div *ngIf="groupes.length === 0" class="pd-empty">{{ t('Aucun groupe disponible') }}</div>
+                </div>
+
+                <!-- Employees -->
+                <div *ngIf="assignMode === 'employee'" class="pd-card-grid pd-card-grid-employees">
+                    <button type="button" *ngFor="let emp of employees" class="pd-card pd-card-employee"
+                        [class.is-selected]="isEmployeeSelected(emp.employeeId)"
+                        (click)="toggleEmployee(emp.employeeId)">
+                        <span class="pd-avatar">{{ (emp.nom || '?').charAt(0) }}{{ (emp.prenom || '?').charAt(0) }}</span>
+                        <span class="pd-card-meta">
+                            <span class="pd-card-label">{{ emp.nom }} {{ emp.prenom }}</span>
+                            <span *ngIf="emp.email" class="pd-card-sub">{{ emp.email }}</span>
+                        </span>
+                        <mat-icon *ngIf="isEmployeeSelected(emp.employeeId)" class="pd-card-check icon-size-5" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                    </button>
+                    <div *ngIf="employees.length === 0" class="pd-empty">{{ t('Aucun employé disponible') }}</div>
+                </div>
+            </div>
+
+            <!-- Work Conditions Section -->
+            <div class="pd-section">
+                <div class="pd-section-header">
+                    <div class="pd-section-indicator pd-indicator-amber"></div>
+                    <h3 class="pd-section-title">{{ t('Conditions de travail') }}</h3>
+                </div>
+
+                <div class="pd-fields-row">
+                    <mat-form-field class="pd-field fuse-mat-dense" appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ t('Horaires (Shift)') }}</mat-label>
+                        <mat-select [formControlName]="'shiftIds'" [multiple]="true" [compareWith]="compareIds">
+                            <mat-select-trigger>
+                                <span *ngIf="form.get('shiftIds')?.value?.length > 0" class="font-medium">
+                                    {{ form.get('shiftIds')?.value?.length }} {{ t('shift(s)') }}
+                                </span>
+                            </mat-select-trigger>
+                            <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId + ''" class="h-auto py-2">
+                                <div class="flex flex-col">
+                                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ shift.label }}</span>
+                                    <span class="text-[11px] font-medium text-slate-500 flex items-center mt-0.5">
+                                        <mat-icon class="icon-size-3 mr-1 text-slate-400" [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                                        {{ shift.startTime }} – {{ shift.endTime }}
+                                    </span>
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:clock'" class="text-slate-400 mr-2"></mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field class="pd-field fuse-mat-dense" appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>{{ t('Dispositif mobile') }}</mat-label>
+                        <mat-select [formControlName]="'deviceIds'" [multiple]="true" [compareWith]="compareIds">
+                            <mat-select-trigger>
+                                <span *ngIf="form.get('deviceIds')?.value?.length > 0" class="font-medium">
+                                    {{ form.get('deviceIds')?.value?.length }} {{ t('dispositif(s)') }}
+                                </span>
+                            </mat-select-trigger>
+                            <mat-option *ngFor="let device of devices" [value]="device.deviceId + ''">
+                                <span class="font-medium text-slate-700 dark:text-slate-200">{{ device.deviceName }}</span>
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:device-phone-mobile'" class="text-slate-400 mr-2"></mat-icon>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="pd-footer">
+        <button *ngIf="form.get('planningId')?.value !== 'new'"
+            type="button" mat-stroked-button class="pd-delete-btn" (click)="delete()">
+            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+            {{ t('Supprimer') }}
+        </button>
+        <div *ngIf="form.get('planningId')?.value === 'new'" class="flex-auto"></div>
+
+        <div class="pd-footer-actions">
+            <button type="button" mat-button (click)="close()" class="pd-cancel-btn">
+                {{ t('Annuler') }}
+            </button>
+            <button type="button" mat-flat-button [disabled]="form.invalid || !hasSelection" (click)="save()" class="pd-save-btn">
+                <mat-icon class="icon-size-5" [svgIcon]="form.get('planningId')?.value === 'new' ? 'heroicons_solid:check' : 'heroicons_solid:arrow-path'"></mat-icon>
+                <span>{{ form.get('planningId')?.value === 'new' ? t('Confirmer') : t('Mettre à jour') }}</span>
+            </button>
+        </div>
+    </div>
+</div>

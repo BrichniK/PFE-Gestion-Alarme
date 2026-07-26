@@ -1,0 +1,42 @@
+/* Custom styles to match Societe design */
+
+.societe-table-row {
+    /* Add any specific hover or transition styles here if not covered by Tailwind */
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* Primary Action Button (Add) */
+.nouvelle-societe-btn {
+    background-color: #2E6C9F;
+    box-shadow: 0 4px 6px -1px rgba(46, 108, 159, 0.3), 0 2px 4px -1px rgba(46, 108, 159, 0.15);
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: #245a85 !important;
+        box-shadow: 0 10px 15px -3px rgba(46, 108, 159, 0.4), 0 4px 6px -2px rgba(46, 108, 159, 0.2);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+/* Action Buttons (Edit, View, Delete) */
+.action-btn {
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+        /* Indigo-500 with opacity */
+        color: #4f46e5;
+        /* Indigo-600 */
+    }
+
+    &.delete:hover {
+        background-color: rgba(239, 68, 68, 0.1);
+        /* Red-500 with opacity */
+        color: #dc2626;
+        /* Red-600 */
+    }
+}

@@ -1,0 +1,175 @@
+<ng-container *transloco="let t">
+<div class="flex-auto overflow-hidden p-6 sm:p-10">
+    <div class="flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700">
+
+        <div class="flex-auto overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                    <tr class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                        <th class="pl-6 py-4 w-12 text-center">
+                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        </th>
+                        <th class="px-6 py-4 font-semibold uppercase tracking-wider cursor-pointer hover:text-indigo-600 transition-colors">
+                            <div class="flex items-center">
+                                {{ t('Date') }}
+                                <mat-icon class="icon-size-3 ml-1" [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Groupe') }}</th>
+                        <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Appareil') }}</th>
+                        <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Shift') }}</th>
+                        <th class="pr-6 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                    @if(selectedPlanning?.planningId === 'new'){
+                    <tr class="bg-indigo-50/50 dark:bg-indigo-900/10">
+                        <td colspan="6" class="px-0 py-0">
+                            <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: selectedPlanning}"></ng-container>
+                        </td>
+                    </tr>
+                    }
+                    @if(plannings$ | async; as plannings){
+                    @for( planning of plannings; track trackByFn($index, planning)){
+                    <tr class="group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200 planning-table-row">
+                        <td class="pl-6 py-4 text-center">
+                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all">
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold uppercase ring-2 ring-gray-100 dark:ring-slate-700 shadow-sm">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+                                        {{ planning.date | date:'dd/MM/yyyy' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">{{ getGroupeNames(planning.groupeIds) }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-700 dark:text-gray-300">{{ getDeviceNames(planning.deviceIds) }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                                {{ getShiftLabels(planning.shiftIds) }}
+                            </span>
+                        </td>
+                        <td class="pr-6 py-4 text-right">
+                            <div class="flex items-center justify-end space-x-1">
+                                <button mat-icon-button [matTooltip]="t('Modifier')" (click)="toggleDetails(planning.planningId)" class="text-gray-400 hover:text-indigo-600 transition-colors">
+                                    <mat-icon class="icon-size-5" [svgIcon]="selectedPlanning?.planningId === planning.planningId ? 'heroicons_solid:chevron-up' : 'heroicons_outline:pencil-square'"></mat-icon>
+                                </button>
+                                @if(hasActionPermission(FuseNavigationAction.Delete)){
+                                <button mat-icon-button [matTooltip]="t('Supprimer')" (click)="deleteSelectedPlanning(planning)" class="text-gray-400 hover:text-red-600 transition-colors">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+
+                    @if(selectedPlanning?.planningId === planning.planningId){
+                    <tr class="bg-gray-50/50 dark:bg-slate-700/20">
+                        <td colspan="6" class="px-0 py-0">
+                            <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: planning}"></ng-container>
+                        </td>
+                    </tr>
+                    }
+                    }
+                    } @else {
+                    <tr>
+                        <td colspan="6" class="py-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <mat-icon class="icon-size-16 text-gray-200 dark:text-gray-700" [svgIcon]="'heroicons_outline:calendar-days'"></mat-icon>
+                                <p class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">{{ t('Aucun planning trouvé') }}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{ t('Affichage') }} <span class="font-medium text-gray-900 dark:text-white">1</span> {{ t('à') }}
+                <span class="font-medium text-gray-900 dark:text-white">10</span> {{ t('sur') }} <span class="font-medium text-gray-900 dark:text-white">{{ planningsLength }}</span> {{ t('résultats') }}
+            </div>
+            <div class="flex items-center space-x-2">
+                <mat-paginator class="bg-transparent" [ngClass]="{'pointer-events-none': isLoading}" [length]="planningsLength" (page)="SortChange()" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 50, 100]" [showFirstLastButtons]="true"></mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #rowDetailsTemplate let-planning>
+    <div class="p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 shadow-inner">
+        <form class="flex flex-col w-full" [formGroup]="selectedPlanningForm">
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Date') }}</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                            <input type="date" [formControlName]="'date'" class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Groupe') }}</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                            <select multiple [formControlName]="'groupeIds'" class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none appearance-none">
+                                @for (grp of groupes; track grp.groupeId) {
+                                <option [value]="grp.groupeId">{{ grp.nom }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Appareil') }}</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5" [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
+                            <select multiple [formControlName]="'deviceIds'" class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none appearance-none">
+                                @for (dev of devices; track dev.deviceId) {
+                                <option [value]="dev.deviceId">{{ dev.deviceName }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Shift') }}</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5" [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                            <select multiple [formControlName]="'shiftIds'" class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none appearance-none">
+                                @for (shift of shifts; track shift.shiftId) {
+                                <option [value]="shift.shiftId">{{ shift.label }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if ((hasActionPermission(FuseNavigationAction.Edit) && planning.planningId !== 'new') ||
+            (hasActionPermission(FuseNavigationAction.Add) && planning.planningId === 'new')) {
+            <div class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-gray-100 dark:border-slate-700">
+                <button type="button" (click)="closeDetails()" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                    {{ t('Annuler') }}
+                </button>
+                <button type="button" (click)="SaveSelectedPlanning()" [disabled]="selectedPlanningForm.invalid" class="inline-flex items-center px-8 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm" style="background-color: #2E6C9F;">
+                    <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                    {{ t('Enregistrer Planning') }}
+                </button>
+            </div>
+            }
+        </form>
+    </div>
+</ng-template>
+</ng-container>

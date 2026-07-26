@@ -1,0 +1,170 @@
+.alerte-grid {
+    grid-template-columns: minmax(96px, 0.75fr) minmax(130px, 0.92fr) minmax(110px, 0.7fr) minmax(96px, 0.62fr) 190px;
+
+    @screen sm {
+        grid-template-columns: minmax(96px, 0.75fr) minmax(130px, 0.92fr) minmax(110px, 0.7fr) minmax(96px, 0.62fr) 190px;
+    }
+
+    @screen md {
+        grid-template-columns: minmax(96px, 0.75fr) minmax(130px, 0.92fr) minmax(110px, 0.7fr) minmax(96px, 0.62fr) 190px;
+    }
+
+    @screen lg {
+        grid-template-columns: minmax(96px, 0.75fr) minmax(130px, 0.92fr) minmax(110px, 0.7fr) minmax(96px, 0.62fr) 190px;
+    }
+}
+
+.alerte-grid-header,
+.alerte-grid-row {
+    column-gap: 0.45rem;
+}
+
+.alerte-grid-row {
+    align-items: center;
+}
+
+.alerte-grid-row > div {
+    min-width: 0;
+}
+
+.alerte-actions {
+    min-width: 190px;
+    flex-wrap: nowrap;
+}
+
+.alerte-hero {
+    background:
+        radial-gradient(circle at top right, rgba(248, 113, 113, 0.14), transparent 34%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+}
+
+.dark .alerte-hero {
+    background:
+        radial-gradient(circle at top right, rgba(248, 113, 113, 0.16), transparent 32%),
+        linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
+}
+
+.alerte-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.alerte-stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(100 116 139);
+}
+
+.alerte-stat-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1;
+    color: rgb(15 23 42);
+}
+
+.dark .alerte-stat-value {
+    color: rgb(248 250 252);
+}
+
+.alerte-action-button {
+    min-width: 9rem;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 9999px;
+    min-height: 2.25rem;
+    padding-inline: 0.7rem;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.alerte-action-label {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.alerte-action-button-danger {
+    color: white !important;
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    box-shadow: 0 14px 30px rgba(220, 38, 38, 0.28);
+}
+
+.alerte-action-button-danger:hover {
+    filter: brightness(1.02);
+}
+
+@media (max-width: 960px) {
+    .alerte-grid {
+        grid-template-columns: minmax(88px, 0.72fr) minmax(118px, 0.9fr) minmax(100px, 0.7fr) minmax(90px, 0.58fr) 175px;
+    }
+
+    .alerte-action-button {
+        min-width: 8.25rem;
+        font-size: 0.72rem;
+        padding-inline: 0.6rem;
+    }
+
+    .alerte-actions {
+        min-width: 175px;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 760px) {
+    .alerte-grid-header {
+        display: none;
+    }
+
+    .alerte-grid-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 0.9rem;
+    }
+
+    .alerte-actions {
+        width: 100%;
+        justify-content: stretch;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .alerte-actions .alerte-action-button {
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .alerte-actions button[mat-icon-button] {
+        flex: 0 0 auto;
+    }
+}
+
+.alerte-employees-section {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.alerte-employee-card {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(241, 245, 249, 0.7);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+:host-context(.dark) .alerte-employee-card {
+    background: rgba(30, 41, 59, 0.6);
+}

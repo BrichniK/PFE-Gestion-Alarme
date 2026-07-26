@@ -1,0 +1,15 @@
+.maintenance-grid {
+    grid-template-columns: 14% 13% 13% 13% 13% 20% 14%;
+
+    @screen sm {
+        grid-template-columns: 14% 13% 13% 13% 13% 20% 14%;
+    }
+
+    @screen md {
+        grid-template-columns: 14% 13% 13% 13% 13% 20% 14%;
+    }
+
+    @screen lg {
+        grid-template-columns: 14% 13% 13% 13% 13% 20% 14%;
+    }
+}

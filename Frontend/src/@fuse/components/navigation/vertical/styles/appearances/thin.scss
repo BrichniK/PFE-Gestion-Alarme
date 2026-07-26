@@ -1,0 +1,141 @@
+/* Variables */
+:root {
+    --fuse-vertical-navigation-thin-width: 140px;
+    --fuse-vertical-navigation-thin-aside-width: 240px;
+    --fuse-vertical-navigation-thin-aside-gap: 12px;
+}
+
+fuse-vertical-navigation {
+    /* Thin appearance overrides */
+    &.fuse-vertical-navigation-appearance-thin {
+        width: var(--fuse-vertical-navigation-thin-width);
+        min-width: var(--fuse-vertical-navigation-thin-width);
+        max-width: var(--fuse-vertical-navigation-thin-width);
+
+        /* Left positioned */
+        &.fuse-vertical-navigation-position-left {
+            &.fuse-vertical-navigation-mode-side {
+                margin-left: calc(
+                    var(--fuse-vertical-navigation-thin-width) * -1
+                );
+            }
+
+            &.fuse-vertical-navigation-opened {
+                margin-left: 0;
+            }
+        }
+
+        /* Right positioned */
+        &.fuse-vertical-navigation-position-right {
+            &.fuse-vertical-navigation-mode-side {
+                margin-right: calc(
+                    var(--fuse-vertical-navigation-thin-width) * -1
+                );
+            }
+
+            &.fuse-vertical-navigation-opened {
+                margin-right: 0;
+            }
+
+            .fuse-vertical-navigation-aside-wrapper {
+                left: auto;
+                right: calc(
+                    var(--fuse-vertical-navigation-thin-width) +
+                    var(--fuse-vertical-navigation-thin-aside-gap)
+                );
+            }
+        }
+
+        /* Wrapper */
+        .fuse-vertical-navigation-wrapper {
+            /* Content */
+            .fuse-vertical-navigation-content {
+                > fuse-vertical-navigation-aside-item,
+                > fuse-vertical-navigation-basic-item {
+                    flex-direction: column;
+                    justify-content: center;
+                    height: auto;
+                    min-height: 72px;
+                    max-height: none;
+                    padding: 6px 16px;
+
+                    .fuse-vertical-navigation-item-wrapper {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        .fuse-vertical-navigation-item {
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 12px 8px;
+                            border-radius: 12px;
+
+                            .fuse-vertical-navigation-item-icon {
+                                margin: 0;
+                            }
+
+                            .fuse-vertical-navigation-item-arrow,
+                            .fuse-vertical-navigation-item-badge-content {
+                                display: none;
+                            }
+
+                            .fuse-vertical-navigation-item-title-wrapper {
+                                display: flex;
+                                justify-content: center;
+                                width: 100%;
+                                margin-left: 0;
+
+                                .fuse-vertical-navigation-item-title {
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    line-height: 1.3;
+                                    text-align: center;
+                                    white-space: nowrap;
+                                }
+                            }
+                        }
+
+                        .fuse-vertical-navigation-item-active,
+                        .fuse-vertical-navigation-item-active-forced {
+                            border-radius: 12px;
+                        }
+                    }
+                }
+
+                > fuse-vertical-navigation-collapsable-item {
+                    display: none;
+                }
+
+                > fuse-vertical-navigation-group-item {
+                    > .fuse-vertical-navigation-item-wrapper {
+                        display: none;
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .fuse-vertical-navigation-aside-wrapper {
+            top: 12px;
+            bottom: 12px;
+            left: calc(
+                var(--fuse-vertical-navigation-thin-width) +
+                var(--fuse-vertical-navigation-thin-aside-gap)
+            );
+            width: var(--fuse-vertical-navigation-thin-aside-width);
+            min-width: var(--fuse-vertical-navigation-thin-aside-width);
+            max-width: var(--fuse-vertical-navigation-thin-aside-width);
+            height: auto;
+            border-radius: 16px;
+            border: 1px solid var(--fuse-border);
+            overflow: hidden;
+            box-shadow: none !important;
+        }
+    }
+}
+
+.fuse-vertical-navigation-appearance-thin
+    ~ .fuse-vertical-navigation-aside-overlay {
+    background-color: transparent;
+}

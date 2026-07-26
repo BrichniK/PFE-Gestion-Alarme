@@ -17,7 +17,7 @@ public class Societe : AuditableEntity
 
     public decimal? Capital { get; private set; }
 
-    public DateTime? DateOverture { get; private set; }
+    public DateTime DateOverture { get; private set; }
     
     public string? Telephone1 { get; private set; }
 
@@ -41,7 +41,7 @@ public class Societe : AuditableEntity
         string? matriculeFiscal,
         string? rne,
         decimal? capital,
-        DateTime? dateOverture,
+        DateTime dateOverture,
         string? telephone1,
         string? telephone2,
         string? fax1,
@@ -73,7 +73,7 @@ public class Societe : AuditableEntity
         string? matriculeFiscal,
         string? rne,
         decimal? capital,
-        DateTime? dateOverture,
+        DateTime dateOverture,
         string? telephone1,
         string? telephone2,
         string? fax1,

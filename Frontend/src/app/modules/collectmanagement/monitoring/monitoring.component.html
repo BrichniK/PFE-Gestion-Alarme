@@ -1,0 +1,335 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header: Title left, controls right -->
+    <div class="flex flex-row items-center justify-between gap-2 p-6 sm:px-10  dark:bg-slate-800 ">
+        <div class="flex items-center gap-3">
+            <h2 class="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white flex-shrink-0">
+                {{ t('Monitoring') }}
+            </h2>
+            <span *ngIf="stats"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                {{ stats.nbAlert }} {{ t('alertes') }}
+            </span>
+        </div>
+        <div class="flex flex-row items-center gap-2 flex-wrap min-w-0 ">
+            <form [formGroup]="dateRangeForm">
+                <mat-form-field class="w-40 sm:w-48 md:w-56 fuse-mat-dense" appearance="fill" subscriptSizing="dynamic">
+                    <mat-date-range-input [rangePicker]="rangePicker">
+                        <input matStartDate formControlName="startDate" [placeholder]="t('Date début')">
+                        <input matEndDate formControlName="endDate" [placeholder]="t('Date fin')">
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matIconSuffix [for]="rangePicker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #rangePicker></mat-date-range-picker>
+                </mat-form-field>
+            </form>
+
+            <mat-form-field class="w-32 sm:w-40 md:w-48 fuse-mat-dense" appearance="fill" subscriptSizing="dynamic">
+                <mat-select [(value)]="selectedDeviceId" [placeholder]="t('Dispositif')">
+                    <mat-option [value]="null">{{ t('Tous') }}</mat-option>
+                    <mat-option *ngFor="let device of devices" [value]="device.deviceId">
+                        {{ device.deviceName }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" (click)="loadStats()" [disabled]="isLoading" class="flex-shrink-0">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:funnel'"></mat-icon>
+                <span class="hidden sm:inline ml-2">{{ t('Filtrer') }}</span>
+                <span class="sm:hidden">{{ t('Filtrer') }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+
+    <!-- Gauges Grid -->
+    <div *ngIf="!isLoading && stats" class="px-6 sm:px-10 pb-10">
+
+        <!-- Summary cards -->
+<!--        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-gray-500 dark:text-gray-400">{{ t('Nombre d\'alertes') }}</div>-->
+<!--                <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.nbAlert }}</div>-->
+<!--            </div>-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-orange-200 dark:border-orange-800 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-orange-500">{{ t('Moy. D1') }}</div>-->
+<!--                <div class="text-2xl font-bold text-orange-600 mt-1">{{ formatMinutes(stats.avgD1Minutes) }}</div>-->
+<!--            </div>-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-blue-500">{{ t('Moy. D2') }}</div>-->
+<!--                <div class="text-2xl font-bold text-blue-600 mt-1">{{ formatMinutes(stats.avgD2Minutes) }}</div>-->
+<!--            </div>-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-yellow-200 dark:border-yellow-800 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-yellow-500">{{ t('Moy. D3') }}</div>-->
+<!--                <div class="text-2xl font-bold text-yellow-600 mt-1">{{ formatMinutes(stats.avgD3Minutes) }}</div>-->
+<!--            </div>-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-green-500">{{ t('Moy. D4') }}</div>-->
+<!--                <div class="text-2xl font-bold text-green-600 mt-1">{{ formatMinutes(stats.avgD4Minutes) }}</div>-->
+<!--            </div>-->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-indigo-200 dark:border-indigo-800 p-4 text-center">-->
+<!--                <div class="text-xs uppercase font-semibold text-indigo-500">{{ t('Duree Total') }}</div>-->
+<!--                <div class="text-2xl font-bold text-indigo-600 mt-1">{{ formatMinutes(stats.maxGaugeMinutes) }}</div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <!-- Circular Gauges -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 flex flex-col items-center justify-center">
+                <div class="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/30 mb-3">
+                    <mat-icon class="icon-size-7 text-indigo-500" [svgIcon]="'heroicons_outline:bell-alert'"></mat-icon>
+                </div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.nbAlert }}</div>
+                <div class="text-xs uppercase font-semibold text-gray-500 dark:text-gray-400 mt-2">{{ t('Nombre d\'alertes') }}</div>
+            </div>
+            <div *ngFor="let gauge of gauges"
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 flex flex-col items-center">
+
+                <!-- Gauge title -->
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                    {{ t(gauge.translationKey) }}
+                </h3>
+
+                <!-- SVG Circular Gauge -->
+                <div class="relative">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <!-- Background circle -->
+                        <circle
+                            cx="100" cy="100" [attr.r]="radius"
+                            fill="none"
+                            stroke="currentColor"
+                            class="text-gray-200 dark:text-slate-700"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="round"
+                        />
+                        <!-- Progress circle -->
+                        <circle
+                            cx="100" cy="100" [attr.r]="radius"
+                            fill="none"
+                            [attr.stroke]="gauge.color"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="round"
+                            [attr.stroke-dasharray]="circumference"
+                            [attr.stroke-dashoffset]="getStrokeDashoffset(gauge.value)"
+                            transform="rotate(-90 100 100)"
+                            class="transition-all duration-700 ease-out"
+                        />
+                    </svg>
+
+                    <!-- Center value -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-2xl font-bold text-gray-900 dark:text-white">
+                            {{ formatMinutes(gauge.value) }}
+                        </span>
+                        <span class="text-xl font-semibold text-gray-600 dark:text-gray-300 mt-1">
+                            {{ getPercentage(gauge.value) }}%
+                        </span>
+<!--                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">-->
+<!--                            {{ t('moy. / alerte') }}-->
+<!--                        </span>-->
+                    </div>
+                </div>
+
+                <!-- Gauge footer -->
+                <div class="mt-4 text-center">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+<!--                        {{ t('Temps Totale') }}: {{ formatMinutes(stats.maxGaugeMinutes) }}-->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Gauge -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-indigo-200 dark:border-indigo-800 p-6 flex flex-col items-center">
+                <h3 class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-4">
+                    {{ t('Durée moyenne Total') }}
+                </h3>
+
+                <div class="relative">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <!-- Background circle -->
+                        <circle
+                            cx="100" cy="100" [attr.r]="radius"
+                            fill="none"
+                            stroke="currentColor"
+                            class="text-gray-200 dark:text-slate-700"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="round"
+                        />
+
+                        <!-- D1 Arc (red) -->
+                        <path
+                            [attr.d]="getTotalSegmentPath(0, stats.avgD1Minutes, totalDurations)"
+                            fill="none"
+                            stroke="#ec0c0c"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="butt"
+                            class="transition-all duration-700 ease-out"
+                        />
+
+                        <!-- D2 Arc (Blue) -->
+                        <path
+                            [attr.d]="getTotalSegmentPath(stats.avgD1Minutes, stats.avgD2Minutes, totalDurations)"
+                            fill="none"
+                            stroke="#3b82f6"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="butt"
+                            class="transition-all duration-700 ease-out"
+                        />
+
+                        <!-- D3 Arc (orange) -->
+                        <path
+                            [attr.d]="getTotalSegmentPath(stats.avgD1Minutes + stats.avgD2Minutes, stats.avgD3Minutes, totalDurations)"
+                            fill="none"
+                            stroke="#ea7908"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="butt"
+                            class="transition-all duration-700 ease-out"
+                        />
+
+                        <!-- D4 Arc (Green) -->
+                        <path
+                            [attr.d]="getTotalSegmentPath(stats.avgD1Minutes + stats.avgD2Minutes + stats.avgD3Minutes, stats.avgD4Minutes, totalDurations)"
+                            fill="none"
+                            stroke="#22c55e"
+                            [attr.stroke-width]="strokeWidth"
+                            stroke-linecap="butt"
+                            class="transition-all duration-700 ease-out"
+                        />
+                    </svg>
+
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                            {{ formatMinutes(totalDurations) }}
+                        </span>
+                        <span class="text-xl font-semibold text-gray-600 dark:text-gray-300 mt-1">
+                                    100%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <div class="flex flex-wrap justify-center gap-3 mt-2">
+                        <span class="flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300">
+                            <span class="w-2 h-2 rounded-full" style="background-color: #ec0c0c;"></span>
+                            D1: {{ formatMinutes(stats.avgD1Minutes) }}
+                        </span>
+                        <span class="flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300">
+                            <span class="w-2 h-2 rounded-full" style="background-color: #3b82f6;"></span>
+                            D2: {{ formatMinutes(stats.avgD2Minutes) }}
+                        </span>
+                        <span class="flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300">
+                            <span class="w-2 h-2 rounded-full" style="background-color: #ea7908;"></span>
+                            D3: {{ formatMinutes(stats.avgD3Minutes) }}
+                        </span>
+                        <span class="flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300">
+                            <span class="w-2 h-2 rounded-full" style="background-color: #22c55e;"></span>
+                            D4: {{ formatMinutes(stats.avgD4Minutes) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════  KPI Diagram  ═══════════════ -->
+        <div class="mt-10">
+<!--            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">{{ t('Indicateurs de fiabilité') }}</h2>-->
+<!--            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">MTBF / MTTF / MTTD / MTTR</p>-->
+
+            <div class="w-full rounded-2xl bg-slate-100 dark:bg-slate-800 px-3 py-6 md:px-6 md:py-8">
+                <div class="diagram-wrapper" #diagramWrapper>
+                    <!-- Back SVG: baseline + guides + phase labels -->
+                    <svg class="metrics-svg metrics-svg--back" #metricsSvg>
+                        <line [attr.x1]="baseline.x1" [attr.y1]="baseline.y"
+                              [attr.x2]="baseline.x2" [attr.y2]="baseline.y"
+                              stroke="#b8c4d3" stroke-width="2" stroke-dasharray="6,4" />
+
+                        @for (g of guideLines; track g.eventId) {
+                        <line [attr.x1]="g.x" [attr.y1]="g.topY1" [attr.x2]="g.x" [attr.y2]="g.topY2"
+                              stroke="#b4c1d1" stroke-width="1.5" stroke-dasharray="4,4" />
+                        <line [attr.x1]="g.x" [attr.y1]="g.botY1" [attr.x2]="g.x" [attr.y2]="g.botY2"
+                              stroke="#b4c1d1" stroke-width="1.5" stroke-dasharray="4,4" />
+                        }
+
+                        @for (phase of phaseLabels; track phase.id) {
+                        <text [attr.x]="phase.x" [attr.y]="phase.y" text-anchor="middle"
+                              dominant-baseline="middle" fill="#475569" class="phase-label-text">
+                            {{ phase.label }}
+                        </text>
+                        }
+                    </svg>
+
+                    <!-- Timeline events -->
+                    <div class="timeline">
+                        @for (event of events; track event.id) {
+                        <div class="timeline-node">
+                            <div class="node-circle" [style.background]="event.color" #circleRef>
+                                <mat-icon [style.color]="event.iconColor">{{ event.icon }}</mat-icon>
+                            </div>
+                            <div class="node-label-wrap">
+                                @for (line of labelLines(event.label); track $index) {
+                                <span class="node-label">{{ line }}</span>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Front SVG: metric arrows + labels -->
+                    <svg class="metrics-svg metrics-svg--front">
+                        @for (m of metricLines; track m.id) {
+                        <g class="metric-arrow-group">
+                            <line [attr.x1]="m.x1" [attr.y1]="m.y" [attr.x2]="m.x2" [attr.y2]="m.y"
+                                  [attr.stroke]="m.color" stroke-width="2" />
+                            <polyline [attr.points]="arrowLeft(m)" fill="none" [attr.stroke]="m.color"
+                                      stroke-width="2" stroke-linejoin="round" />
+                            <polyline [attr.points]="arrowRight(m)" fill="none" [attr.stroke]="m.color"
+                                      stroke-width="2" stroke-linejoin="round" />
+                            <line [attr.x1]="m.x1" [attr.y1]="m.y - 6" [attr.x2]="m.x1" [attr.y2]="m.y + 6"
+                                  [attr.stroke]="m.color" stroke-width="1.5" />
+                            <line [attr.x1]="m.x2" [attr.y1]="m.y - 6" [attr.x2]="m.x2" [attr.y2]="m.y + 6"
+                                  [attr.stroke]="m.color" stroke-width="1.5" />
+                            <rect [attr.x]="metricLabelRectX(m)" [attr.y]="labelY(m) - 13"
+                                  [attr.width]="metricLabelRectWidth(m)" height="18" rx="9"
+                                  [attr.fill]="m.color" opacity="0.08" />
+                            <text [attr.x]="labelX(m)" [attr.y]="labelY(m)" text-anchor="middle"
+                                  dominant-baseline="middle" [attr.fill]="m.color" class="metric-label-text">
+                                {{ getMetricDiagramLabel(m) }}
+                            </text>
+                        </g>
+                        }
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Metric definition cards -->
+            <div class="mx-auto w-full max-w-[1400px] mt-6">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    @for (def of metricDefinitionCards; track def.code) {
+                    <article class="rounded-xl border px-4 py-3" [ngClass]="getMetricCardClasses(def.code)">
+                        <span class="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold tracking-wide text-slate-700">
+                            {{ def.code }}
+                        </span>
+                        <p class="mt-2 font-mono text-xl font-bold text-slate-800">
+                            {{ getMetricDisplayValue(def.code) }}
+                        </p>
+                        <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                            {{ def.description }}
+                        </p>
+                    </article>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="stats.nbAlert === 0"
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-12 text-center">
+            <mat-icon class="icon-size-12 text-gray-400" [svgIcon]="'heroicons_outline:chart-bar'"></mat-icon>
+            <p class="mt-4 text-gray-500 dark:text-gray-400">{{ t('Aucune donnée pour la période sélectionnée') }}</p>
+        </div>
+    </div>
+
+</div>

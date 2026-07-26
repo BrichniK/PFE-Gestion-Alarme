@@ -1,0 +1,164 @@
+<div class="ind-shell p-3 lg:p-5">
+    <div class="max-w-[2200px] mx-auto">
+        <!-- ═══════ HEADER ═══════ -->
+        <header class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-tight text-slate-900 leading-none">
+                        SURVEILLANCE INDUSTRIELLE
+                    </h1>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mt-0.5">Contrôle en temps
+                        réel • CST</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Filtres -->
+                <div class="flex p-0.5 bg-slate-100 border border-slate-200 rounded-lg">
+                    <button *ngFor="let f of ['all', 'error', 'maintenance', 'ok']" (click)="setFilter(f)" [class]="activeFilter === f
+                                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                                : 'text-slate-400 hover:text-slate-600 border border-transparent'"
+                        class="px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider transition-all">
+                        {{ f === 'all' ? 'Tous' : (f === 'error' ? 'Alertes' : (f === 'maintenance' ? 'Maint.' :
+                        'Normal')) }}
+                    </button>
+                </div>
+
+                <!-- Connexion -->
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-slate-200">
+                    <div class="live-dot" [class.bg-emerald-500]="isRealtimeConnected"
+                        [class.bg-amber-500]="!isRealtimeConnected"></div>
+                    <span class="text-[9px] font-bold uppercase tracking-widest"
+                        [class.text-emerald-600]="isRealtimeConnected" [class.text-amber-600]="!isRealtimeConnected">
+                        {{ isRealtimeConnected ? 'CONNECTÉ' : 'HORS LIGNE' }}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ═══════ LOADING ═══════ -->
+        @if (isLoading) {
+        <div class="flex flex-col items-center justify-center py-20">
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-slate-400 text-xs font-bold mt-3">Connexion aux capteurs...</p>
+        </div>
+        } @else {
+
+        <!-- ═══════ DEVICE GRID ═══════ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            @for (device of filteredDevices; track device.deviceId) {
+            <article [class]="'ind-card' +
+                    (isDeviceInAlert(device) ? ' ind-card--error' : '') +
+                    (isDeviceUnderMaintenance(device) ? ' ind-card--maintenance' : '')">
+
+                <div class="p-3 h-full">
+                    <div class="flex flex-col sm:flex-row gap-3 h-full sm:items-stretch">
+                        <div class="sm:w-[42%] shrink-0 flex flex-col items-center text-center">
+                            <h2 class="text-xl font-black text-slate-900 tracking-tight leading-none truncate w-full">
+                                {{ device.deviceName || 'Unité-X' }}
+                            </h2>
+                            <p class="mono-val text-[10px] font-bold text-slate-400 leading-none mt-1">
+                                {{ device.matricule || '—' }}
+                            </p>
+                            <div class="w-44 h-44 flex items-center justify-center my-2 shrink-0">
+                                <img [src]="getDeviceImagePath(device)"
+                                    [class]="'w-full h-full object-contain drop-shadow-xl' + (isDeviceOffline(device) ? ' device-image--offline' : '')"
+                                    alt="Device">
+                            </div>
+                        </div>
+
+                        <div class="sm:w-[58%] min-w-0 flex flex-col h-full">
+                            <div class="flex items-center justify-between mb-2 px-0.5">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Capteurs</span>
+                                <span class="mono-val text-[12px] font-bold text-slate-500">{{ sensorSlots(device).length }}</span>
+                            </div>
+
+                            <div class="captures-container space-y-2">
+                                @for (sensor of sensorSlots(device); track sensor.index) {
+                                <div [class]="'sensor-row' +
+                                            (sensor.status === 'ERROR' ? ' sensor-row--error' : '') +
+                                            (sensor.isUnderMaintenance && !hasKnownMaintenancePhase(sensor) ? ' sensor-row--maintenance' : '') +
+                                            (isMaintenancePhase(sensor, 'AFFECTEE') ? ' sensor-row--maintenance-affectee' : '') +
+                                            (isMaintenancePhase(sensor, 'DIAGNOSTIC') ? ' sensor-row--maintenance-diagnostic' : '') +
+                                            (isMaintenancePhase(sensor, 'REPARATION') ? ' sensor-row--maintenance-reparation' : '') +
+                                            (sensor.status === 'WORKING' && !sensor.isUnderMaintenance ? ' sensor-row--ok' : '') +
+                                            (sensor.status === 'NOT_AVAILABLE' ? ' sensor-row--na' : '') +
+                                            (isDeviceOffline(device) ? ' sensor-row--offline' : '')"
+                                    [style.background-color]="sensor.isUnderMaintenance ? getMaintenanceBackgroundColor(sensor) : null"
+                                    [style.border-color]="sensor.isUnderMaintenance ? getMaintenanceBorderColor(sensor) : null"
+                                    [style.color]="sensor.isUnderMaintenance ? '#ffffff' : null">
+
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        <div [class]="'capture-badge' +
+                                                    (sensor.status === 'ERROR' ? ' capture-badge--error' : '') +
+                                                    (sensor.isUnderMaintenance ? ' capture-badge--maintenance' : '') +
+                                                    (sensor.status === 'WORKING' && !sensor.isUnderMaintenance ? ' capture-badge--ok' : '') +
+                                                    (sensor.status === 'NOT_AVAILABLE' ? ' capture-badge--na' : '') +
+                                                    (isDeviceOffline(device) ? ' capture-badge--offline' : '')">
+                                            A{{sensor.index}}
+                                        </div>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="text-[12px] font-bold leading-tight truncate"
+                                                [class.text-red-700]="sensor.status === 'ERROR'"
+                                                [class.text-emerald-700]="sensor.status === 'WORKING' && !sensor.isUnderMaintenance"
+                                                [class.text-slate-400]="sensor.status === 'NOT_AVAILABLE'">
+                                                {{ getCaptureLabel(sensor) }}
+                                            </span>
+                                            @if (sensor.isUnderMaintenance && sensor.maintenanceEmployeeName) {
+                                            <span class="text-[10px] font-bold leading-tight truncate text-white">
+                                                {{ sensor.maintenanceEmployeeName }}
+                                            </span>
+                                            }
+                                            @if (sensor.isUnderMaintenance && getMaintenancePhaseLabel(sensor.maintenancePhase)) {
+                                            <span class="text-[10px] font-bold leading-tight truncate text-white">
+                                                {{ getMaintenancePhaseLabel(sensor.maintenancePhase) }}
+                                            </span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col items-end shrink-0 ml-2">
+                                        @if (sensor.status === 'ERROR') {
+                                        <span class="mono-val text-base font-bold text-red-600 leading-none">
+                                            {{ getAlertDuration(sensor) }}
+                                        </span>
+                                        <span class="text-[9px] font-bold text-red-400 mt-0.5 text-right w-full">
+                                            {{ getAlertDateTime(sensor) }}
+                                        </span>
+                                        } @else if (sensor.isUnderMaintenance) {
+                                        <span class="mono-val text-sm font-bold leading-none text-white">
+                                            {{ getMaintenanceDuration(sensor) }}
+                                        </span>
+                                        <span class="text-[9px] font-bold mt-0.5 text-right w-full text-white">
+                                            {{ getMaintenanceDateTime(sensor) }}
+                                        </span>
+                                        } @else if (sensor.status === 'WORKING') {
+                                        <div class="flex items-center gap-1.5">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                            <span class="text-[10px] font-black text-emerald-600 uppercase tracking-tight">OK</span>
+                                        </div>
+                                        } @else {
+                                        <span class="text-[10px] text-slate-400 font-bold">—</span>
+                                        }
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            }
+        </div>
+        }
+    </div>
+</div>
+

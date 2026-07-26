@@ -1,0 +1,356 @@
+<div class="gantt-container flex flex-col w-full h-full bg-card">
+
+    <!-- ===== HEADER ===== -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 border-b gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight">Diagramme de Gantt</h1>
+            <p class="text-secondary text-sm mt-1">Visualisation des alertes et leurs étapes T1 → T5</p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap">
+            <!-- Type d'alerte filter -->
+            <mat-form-field class="w-full sm:w-64 fuse-mat-dense">
+                <mat-label>Type d'alerte</mat-label>
+                <mat-select [(ngModel)]="selectedTypeIds" multiple>
+                    <div class="px-4 py-2 border-b border-gray-200">
+                        <mat-checkbox [checked]="allTypesSelected" [indeterminate]="someTypesSelected && !allTypesSelected"
+                            (change)="toggleSelectAllTypes()">
+                            Tout sélectionner
+                        </mat-checkbox>
+                    </div>
+                    @for (type of alerteTypes; track type.typeId) {
+                        <mat-option [value]="type.typeId">
+                            {{ type.label }}
+                        </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Date range -->
+            <mat-form-field class="w-full sm:w-64 fuse-mat-dense" >
+                <mat-label>Période</mat-label>
+                <mat-date-range-input [rangePicker]="picker">
+                    <input matStartDate [(ngModel)]="startDate" placeholder="Date début" required>
+                    <input matEndDate [(ngModel)]="endDate" placeholder="Date fin" required>
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+            </mat-form-field>
+
+            <!-- Display button -->
+            <button mat-flat-button color="primary"
+                [disabled]="!canDisplay || isLoading || selectedTypeIds.length === 0"
+                (click)="onDisplay()"
+                class="h-10 px-6">
+                <mat-icon class="mr-1">play_arrow</mat-icon>
+                Afficher
+            </button>
+
+            <!-- Count -->
+            @if (hasLoaded) {
+                <span class="text-sm text-secondary">
+                    {{ filteredRows.length }} alerte(s)
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- ===== LEGEND ===== -->
+    <div class="flex items-center gap-4 px-6 py-2 border-b text-xs flex-wrap">
+        <span class="font-semibold text-gray-600">Légende :</span>
+        @for (item of legendItems; track item.key) {
+            <div class="flex items-center gap-1.5">
+                <span class="w-4 h-3 rounded-sm inline-block" [style.background]="item.color"></span>
+                <span class="text-gray-600">{{ item.label }}</span>
+            </div>
+        }
+        <div class="flex items-center gap-1.5 ml-4">
+            <span class="w-2 h-4 bg-gray-800 dark:bg-gray-200 inline-block rounded-full"></span>
+            <span class="text-gray-600">Marqueur T</span>
+        </div>
+        <span class="ml-4 text-gray-400 italic">Cliquez 2 créneaux sur la timeline pour zoomer</span>
+    </div>
+
+    <!-- ===== ZOOM & PAGINATION CONTROLS ===== -->
+    @if (hasLoaded && filteredRows.length > 0) {
+
+        <!-- Pagination jour (toujours centré) -->
+        <div class="flex items-center justify-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mx-6 mt-4">
+            <button mat-icon-button [disabled]="currentPageIndex === 0" (click)="previousPage()">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <div class="text-center min-w-[200px]">
+                <div class="font-semibold text-slate-800 dark:text-slate-100">{{ currentDayLabel }}</div>
+                @if (isMultiDay) {
+                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ currentPageIndex + 1 }} / {{ dayPages.length }}</div>
+                }
+            </div>
+            <button mat-icon-button [disabled]="currentPageIndex >= dayPages.length - 1" (click)="nextPage()">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+        </div>
+
+        <!-- Zoom & first-click controls -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 px-6 py-2 border-b bg-white dark:bg-gray-850">
+
+            <!-- Zoom info -->
+            @if (isZoomed) {
+                <div class="flex items-center gap-2 ml-auto">
+                    <mat-icon class="text-blue-500 icon-size-4">zoom_in</mat-icon>
+                    <span class="text-sm font-mono text-blue-600">{{ getZoomLabel() }}</span>
+                    <span class="text-xs text-gray-400">(Niveau {{ zoomLevel }})</span>
+
+                    <!-- Scroll slider -->
+                    <div class="flex items-center gap-2 ml-3">
+                        <mat-icon class="icon-size-4 text-gray-400">swap_horiz</mat-icon>
+                        <input type="range"
+                            class="zoom-slider w-40"
+                            [min]="getScrollMin()"
+                            [max]="getScrollMax()"
+                            [value]="scrollPosition"
+                            (input)="onScrollChange($event)">
+                    </div>
+
+                    <button mat-stroked-button class="text-sm ml-2" (click)="resetZoom()">
+                        <mat-icon class="mr-1 icon-size-4">zoom_out</mat-icon>
+                        Réinitialiser
+                    </button>
+                </div>
+            }
+
+            <!-- First click indicator -->
+            @if (firstClickedSlot !== null) {
+                <div class="flex items-center gap-1 ml-auto text-xs text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                    <mat-icon class="icon-size-4">touch_app</mat-icon>
+                    <span>1er point: <strong>{{ getFirstClickLabel() }}</strong> — cliquez un 2ème créneau pour zoomer</span>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- ===== LOADING ===== -->
+    @if (isLoading) {
+        <div class="flex items-center justify-center py-20">
+            <mat-spinner diameter="48"></mat-spinner>
+        </div>
+    }
+
+    <!-- ===== INITIAL STATE (no date selected yet) ===== -->
+    @if (!isLoading && !hasLoaded) {
+        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+            <mat-icon class="text-6xl mb-4 icon-size-16">date_range</mat-icon>
+            <p class="text-lg">Sélectionnez une période</p>
+            <p class="text-sm mt-1">Choisissez les dates de début et de fin puis cliquez <strong>Afficher</strong></p>
+        </div>
+    }
+
+    <!-- ===== EMPTY STATE (loaded but no data) ===== -->
+    @if (!isLoading && hasLoaded && filteredRows.length === 0) {
+        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+            <mat-icon class="text-6xl mb-4 icon-size-16">bar_chart</mat-icon>
+            <p class="text-lg">Aucune alerte trouvée</p>
+            <p class="text-sm mt-1">Aucune donnée pour la période sélectionnée</p>
+        </div>
+    }
+
+    <!-- ===== GANTT CHART ===== -->
+    @if (!isLoading && hasLoaded && filteredRows.length > 0) {
+        <div class="flex-1 overflow-auto px-6 py-4">
+
+            <!-- Timeline header -->
+            <div class="flex border-b pb-1 mb-2 sticky top-0 bg-card z-10">
+                <!-- Label column -->
+                <div class="gantt-label-col flex-shrink-0 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-end pb-1">
+                    Alerte / Appareil
+                </div>
+                <!-- Début alerte column -->
+                <div class="gantt-debut-col flex-shrink-0 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-end pb-1">
+                    Début alerte
+                </div>
+                <!-- Fin alerte column -->
+                <div class="gantt-fin-col flex-shrink-0 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-end pb-1">
+                    Fin alerte
+                </div>
+                <!-- Durée column -->
+                <div class="gantt-duree-col flex-shrink-0 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-end pb-1">
+                    Durée Totale
+                </div>
+                <!-- Timeline (clickable for zoom) -->
+                <div class="gantt-timeline-col flex-1 relative">
+                    <div class="flex justify-between">
+                        @for (slot of displayedTimeSlots; track slot; let si = $index) {
+                            <span class="gantt-timeslot-header text-[10px] text-gray-400 font-mono cursor-pointer hover:text-blue-500 hover:font-bold px-0.5 py-1 rounded transition-colors select-none"
+                                  [class.text-amber-600]="firstClickedSlot === si"
+                                  [class.font-bold]="firstClickedSlot === si"
+                                  [class.bg-amber-50]="firstClickedSlot === si"
+                                  (click)="onTimeSlotClick(si)">
+                                {{ slot }}
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gantt rows -->
+            @for (row of filteredRows; track trackByFn($index, row); let i = $index) {
+                <div class="gantt-row flex items-stretch border-b border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                     [class.bg-gray-25]="i % 2 === 0">
+
+                    <!-- Label column -->
+                    <div class="gantt-label-col flex-shrink-0 py-2 pr-3">
+                        <div class="flex flex-col">
+                            @if (row.alerteTypeLabel) {
+                                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400 truncate" [matTooltip]="row.alerteTypeLabel">
+                                    {{ row.alerteTypeLabel }}
+                                </span>
+                            }
+                            <span class="text-xs text-gray-600 dark:text-gray-300 truncate" [matTooltip]="row.deviceName">
+                                <span class="font-semibold text-gray-500">Device :</span> {{ row.deviceName }}
+                            </span>
+                            <span class="text-xs text-gray-600 dark:text-gray-300 truncate" [matTooltip]="row.employeeName">
+                                <span class="font-semibold text-gray-500">Employé :</span> {{ row.employeeName }}
+                            </span>
+                            <span class="mt-1 text-[10px] px-2 py-0.5 rounded-full inline-block w-fit"
+                                [ngClass]="getStepBadgeColor(row.currentStep)">
+                                {{ row.currentStep }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Début alerte column -->
+                    <div class="gantt-debut-col flex-shrink-0 py-2 px-2">
+                        <span class="text-xs font-mono text-gray-700 dark:text-gray-300">{{ formatDateTime(row.t1Alerte) }}</span>
+                    </div>
+
+                    <!-- Fin alerte column -->
+                    <div class="gantt-fin-col flex-shrink-0 py-2 px-2">
+                        <span class="text-xs font-mono text-gray-700 dark:text-gray-300">{{ formatDateTime(row.t5Confirmation) }}</span>
+                    </div>
+
+                    <!-- Durée column -->
+                    <div class="gantt-duree-col flex-shrink-0 py-2 px-2">
+                        @if (computeAlertDurationMinutes(row.t1Alerte, row.t5Confirmation) !== null) {
+                            <span class="text-xs font-semibold text-gray-800 dark:text-gray-200">{{ formatDuration(computeAlertDurationMinutes(row.t1Alerte, row.t5Confirmation)!) }}</span>
+                        } @else {
+                            <span class="text-xs text-gray-400">-</span>
+                        }
+                    </div>
+
+                    <!-- Timeline bar area -->
+                    <div class="gantt-timeline-col flex-1 relative py-2 min-h-[60px]">
+                        <!-- Background grid lines -->
+                        @for (slot of displayedTimeSlots; track slot; let j = $index) {
+                            <div class="absolute top-0 bottom-0 border-l border-gray-100 dark:border-gray-700"
+                                 [style.left]="(j / (displayedTimeSlots.length - 1 || 1)) * 100 + '%'">
+                            </div>
+                        }
+
+                        <!-- Segment bars -->
+                        @for (segment of row.segments; track segment.stepFrom) {
+                            <div class="gantt-bar absolute top-1/2 -translate-y-1/2 h-7 rounded-md cursor-pointer shadow-sm transition-all duration-150"
+                                [style.left]="getBarLeftPercent(segment)"
+                                [style.width]="getBarWidthPercent(segment)"
+                                [style.background]="segment.color"
+                                (mouseenter)="showSegmentPopup($event, segment, row)"
+                                (mouseleave)="hideSegmentPopup()">
+                                <span class="gantt-bar-label absolute inset-0 flex items-center justify-center text-[9px] text-white font-semibold truncate px-1">
+                                    {{ segment.stepFrom }}→{{ segment.stepTo }}
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- ===== DETAIL POPUP ===== -->
+    @if (selectedSegment && selectedRow) {
+        <div class="gantt-popup fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 w-80 max-h-[calc(100vh-20px)] overflow-y-auto"
+             [style.left.px]="popupX" [style.top.px]="popupY"
+             (mouseenter)="keepPopupOpen()" (mouseleave)="hideSegmentPopup()">
+
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedRow.deviceName }}</h3>
+                <span class="text-[10px] px-2 py-0.5 rounded-full" [ngClass]="getStepBadgeColor(selectedRow.currentStep)">
+                    {{ selectedRow.currentStep }}
+                </span>
+            </div>
+
+            <div class="text-xs text-gray-500 mb-3">{{ selectedRow.employeeName }}</div>
+
+            <!-- Current segment info -->
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 mb-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-3 h-3 rounded-sm" [style.background]="selectedSegment.color"></span>
+                    <span class="font-semibold text-sm">{{ selectedSegment.label }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <span class="text-gray-400">Début</span>
+                        <p class="font-mono">{{ formatDateTime(selectedSegment.startTime) }}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-400">Fin</span>
+                        <p class="font-mono">{{ formatDateTime(selectedSegment.endTime) }}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-gray-400">Durée</span>
+                        <p class="font-semibold text-base">{{ formatDuration(selectedSegment.durationMinutes) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All T steps with durations -->
+            <div class="text-xs space-y-1">
+                <div class="font-semibold text-gray-600 mb-1">Détail des étapes :</div>
+                <div class="flex justify-between">
+                    <span class="text-red-600 font-bold">T1 Alerte</span>
+                    <span class="font-mono">{{ formatDateTime(selectedRow.t1Alerte) }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-red-50 dark:bg-red-900/20 rounded px-2 py-0.5">
+                    <span class="text-red-500">D1</span>
+                    <span class="font-mono font-semibold text-red-600">{{ getDuration(selectedRow.t1Alerte, selectedRow.t2Assignment) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-orange-500 font-bold">T2 Affectation</span>
+                    <span class="font-mono">{{ formatDateTime(selectedRow.t2Assignment) }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-blue-50 dark:bg-blue-900/20 rounded px-2 py-0.5">
+                    <span class="text-orange-500">D2</span>
+                    <span class="font-mono font-semibold text-orange-600">{{ getDuration(selectedRow.t2Assignment, selectedRow.t3Arrival) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-blue-500 font-bold">T3 Diagnostique</span>
+                    <span class="font-mono">{{ formatDateTime(selectedRow.t3Arrival) }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/20 rounded px-2 py-0.5">
+                    <span class="text-blue-500">D3</span>
+                    <span class="font-mono font-semibold text-blue-600">{{ getDuration(selectedRow.t3Arrival, selectedRow.t4Completion) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-emerald-600 font-bold">T4 Réparation</span>
+                    <span class="font-mono">{{ formatDateTime(selectedRow.t4Completion) }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-green-50 dark:bg-green-900/20 rounded px-2 py-0.5">
+                    <span class="text-emerald-600">D4</span>
+                    <span class="font-mono font-semibold text-emerald-600">{{ getDuration(selectedRow.t4Completion, selectedRow.t5Confirmation) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-emerald-600 font-bold">T5 Fin</span>
+                    <span class="font-mono">{{ formatDateTime(selectedRow.t5Confirmation) }}</span>
+                </div>
+                <div class="flex justify-between pt-1 border-t border-gray-200 mt-1">
+                    <span class="font-bold text-gray-700">Durée totale</span>
+                    <span class="font-bold">{{ formatDuration(selectedRow.totalDurationMinutes) }}</span>
+                </div>
+            </div>
+
+            @if (selectedRow.description) {
+                <div class="mt-3 pt-2 border-t border-gray-200 text-xs text-gray-500">
+                    <span class="font-semibold">Description :</span> {{ selectedRow.description }}
+                </div>
+            }
+        </div>
+    }
+</div>

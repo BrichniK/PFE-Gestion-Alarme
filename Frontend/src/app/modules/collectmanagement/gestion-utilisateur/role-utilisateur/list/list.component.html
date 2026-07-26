@@ -1,0 +1,138 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 bg-white dark:bg-slate-800 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
+                    t('Fichier') }}</a>
+                <mat-icon class="icon-size-4 mx-2 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                <span>{{ t('User-Role') }}</span>
+            </div>
+            <!-- Title -->
+            <div class="mt-2 flex items-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+                    {{ t('Rôles Utilisateur') }}
+                </h2>
+                <span
+                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {{ roleUtilisateursLength }} {{ t('Total') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-3">
+            <div class="relative flex-1 sm:grow-0">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                </span>
+                <form [formGroup]="roleUtilisateurFilterForm">
+                    <input type="text" [formControlName]="'search'" [placeholder]="t('Rechercher un rôle...')"
+                        class="block w-full sm:w-80 pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm">
+                </form>
+            </div>
+
+            @if(hasActionPermission(FuseNavigationAction.Add)){
+            <a [routerLink]="['ajouter']"
+                class="inline-flex items-center px-8 py-3.5 rounded-xl shadow-lg text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transform active:scale-95 transition-all"
+                style="background-color: #2E6C9F; --tw-ring-color: #2E6C9F;">
+                <mat-icon class="icon-size-6 mr-2 text-white" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span>{{ t('Add') }}</span>
+            </a>
+            }
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-auto overflow-hidden p-6 sm:p-10">
+        <div
+            class="flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700">
+
+            <div class="flex-auto overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr
+                            class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                            <th class="pl-6 py-4 w-12 text-center">
+                                <input type="checkbox"
+                                    class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            </th>
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider cursor-pointer hover:text-indigo-600 transition-colors"
+                                (click)="SortChange()">
+                                <div class="flex items-center">
+                                    {{ t('Label') }}
+                                    <mat-icon class="icon-size-3 ml-1"
+                                        [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+                                </div>
+                            </th>
+                            <th class="pr-6 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Actions') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                        @if(roleUtilisateurs?.length > 0){
+                        @for( item of roleUtilisateurs; track item.roleUtilisateurId || $index){
+                        <tr class="group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200 cursor-pointer"
+                            [routerLink]="[item.roleUtilisateurId]">
+                            <td class="pl-6 py-4 text-center">
+                                <input type="checkbox"
+                                    class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all">
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {{ item.libelleRoleUtilisateur }}
+                                </span>
+                            </td>
+                            <td class="pr-6 py-4 text-right">
+                                <div class="flex items-center justify-end space-x-1">
+                                    @if(hasActionPermission(FuseNavigationAction.Delete)){
+                                    <button mat-icon-button
+                                        (click)="$event.stopPropagation(); deleteRoleUtilisateur(item.roleUtilisateurId)"
+                                        [matTooltip]="'Supprimer'"
+                                        class="text-gray-400 hover:text-red-600 transition-colors">
+                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                        } @else {
+                        <tr>
+                            <td colspan="3" class="py-20 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <mat-icon class="icon-size-16 text-gray-200 dark:text-gray-700"
+                                        [svgIcon]="'heroicons_outline:users'"></mat-icon>
+                                    <p class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">{{
+                                        t('Empty-List!') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div
+                class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('Showing') }} <span class="font-medium text-gray-900 dark:text-white">1</span> {{ t('to') }}
+                    <span class="font-medium text-gray-900 dark:text-white">{{ roleUtilisateurs?.length < 10 ?
+                            roleUtilisateurs?.length : 10 }}</span> {{ t('of') }} <span
+                                class="font-medium text-gray-900 dark:text-white">{{ roleUtilisateursLength }}</span> {{
+                            t('results') }}
+                </div>
+                <div class="flex items-center space-x-2">
+                    <mat-paginator class="bg-transparent" [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="roleUtilisateursLength" (page)="SortChange()" [pageSize]="50"
+                        [pageSizeOptions]="[5, 10, 25, 50, 100]" [showFirstLastButtons]="true"></mat-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

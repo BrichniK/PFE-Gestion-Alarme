@@ -1,0 +1,278 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Sticky Header -->
+    <div class="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between px-6 py-4 sm:px-10">
+            <div class="flex-1 min-w-0">
+                <!-- Breadcrumbs -->
+                <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <a class="hover:text-indigo-600 transition-colors cursor-pointer" [routerLink]="['../']">{{
+                        t('Societe') }}</a>
+                    <mat-icon class="icon-size-3 mx-1 text-gray-400"
+                        [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    <span>{{ societe.societeId ? t('Edit') : t('Create') }}</span>
+                </div>
+                <!-- Title -->
+                <div class="flex items-center">
+                    <button
+                        class="mr-3 -ml-2 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                        [routerLink]="['../']">
+                        <mat-icon class="icon-size-5 text-gray-500"
+                            [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                    </button>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white truncate">
+                        {{ societe.societeId ? societe.nom : t('New Company') }}
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Content -->
+    <div class="flex-auto overflow-y-auto p-6 sm:p-10">
+        <div class="max-w-5xl mx-auto space-y-8">
+
+            <!-- Success/Error Messages -->
+            @if (flashMessage){
+            <div [@fadeIn]
+                [ngClass]="{'bg-green-50 border-green-200 text-green-800': flashMessage === 'success', 'bg-red-50 border-red-200 text-red-800': flashMessage === 'error'}"
+                class="flex items-center p-4 rounded-xl border">
+                <mat-icon class="mr-3"
+                    [svgIcon]="flashMessage === 'success' ? 'heroicons_outline:check-circle' : 'heroicons_outline:x-circle'"></mat-icon>
+                <span class="font-medium">
+                    {{ flashMessage === 'success' ? t('Company saved successfully!') : t('An error occurred, please try
+                    again.') }}
+                </span>
+            </div>
+            }
+
+            <form [formGroup]="societeForm" class="space-y-8">
+
+                <!-- Section: Identity & Logo -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                    <div
+                        class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('Identity & Logo') }}</h3>
+                        <p class="text-sm text-gray-500">{{ t('Company identification and branding') }}</p>
+                    </div>
+
+                    <div class="p-8">
+                        <div class="flex flex-col md:flex-row gap-10">
+                            <!-- Logo Upload -->
+                            <div class="flex flex-col items-center space-y-4">
+                                <div (click)="societeLogoInput.click()"
+                                    class="group relative w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-900 flex items-center justify-center cursor-pointer hover:border-indigo-500 transition-all overflow-hidden shadow-inner">
+
+                                    @if (!societeForm.value?.logoPath && !logoSrc) {
+                                    <div class="flex flex-col items-center text-gray-400 group-hover:text-indigo-500">
+                                        <mat-icon class="icon-size-8" [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                        <span class="mt-2 text-[10px] font-bold uppercase tracking-wider">{{ t('Upload
+                                            Logo') }}</span>
+                                    </div>
+                                    } @else {
+                                    <img class="w-full h-full object-cover rounded-xl shadow-lg transition-transform group-hover:scale-110"
+                                        [src]="logoSrc || ('societe/images/' + societeForm.value?.logoPath | securefile | async)"
+                                        alt="Logo">
+                                    <div
+                                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                        <mat-icon class="text-white icon-size-6"
+                                            [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                    </div>
+                                    }
+                                </div>
+                                <input #societeLogoInput class="hidden" type="file" (change)="saveImage($event)"
+                                    accept=".png, .jpeg, .jpg" />
+                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">{{ t('PNG or
+                                    JPG, Max 2MB') }}</p>
+                            </div>
+
+                            <!-- Identity Fields -->
+                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <!-- Name -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
+                                        t('Company-name') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:building-office-2'"></mat-icon>
+                                        <input type="text" [formControlName]="'nom'"
+                                            class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                                            [placeholder]="t('Enter company name')">
+                                    </div>
+                                    @if (societeForm.get('nom').touched && societeForm.get('nom').invalid) {
+                                    <p class="text-xs text-red-500 font-medium">{{ t('Name is too short or missing') }}
+                                    </p>
+                                    }
+                                </div>
+
+                                <!-- Tax Number -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
+                                        t('Tax-Number') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:identification'"></mat-icon>
+                                        <input type="text" [formControlName]="'matriculeFiscal'"
+                                            class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                                            [placeholder]="t('Fiscal registration')">
+                                    </div>
+                                </div>
+
+                                <!-- RNE -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
+                                        t('RNE') }}</label>
+                                    <div class="relative rounded-lg shadow-sm">
+                                        <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:document-text'"></mat-icon>
+                                        <input type="text" [formControlName]="'rne'"
+                                            class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                                            [placeholder]="t('National business registry')">
+                                    </div>
+                                </div>
+
+                                <!-- Capital -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
+                                        t('Capital') }}</label>
+                                    <div class="relative">
+                                        <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                            [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+                                        <input type="text" [formControlName]="'capital'"
+                                            class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+                                            [placeholder]="'0.00'">
+                                        <div
+                                            class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-indigo-600 font-bold text-xs uppercase tracking-wider">
+                                            TND</div>
+                                    </div>
+                                </div>
+
+                                <!-- Date Ouverture -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
+                                        t('Opening-Date') }} <span class="text-red-500">*</span></label>
+                                    <div class="relative cursor-pointer" (click)="picker.open()">
+                                        <mat-icon
+                                            class="absolute left-3 top-3.5 text-indigo-500 icon-size-5 cursor-pointer"
+                                            [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                                        <input matInput [matDatepicker]="picker" [formControlName]="'dateOverture'"
+                                            class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
+                                            readonly>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Contact Details -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                    <div
+                        class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('Contact Details') }}</h3>
+                        <p class="text-sm text-gray-500">{{ t('How to reach the company') }}</p>
+                    </div>
+
+                    <div class="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Email -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('E-mail')
+                                }}</label>
+                            <div class="relative">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                                <input type="email" [formControlName]="'email'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    [placeholder]="'contact@societe.com'">
+                            </div>
+                            @if (societeForm.get('email').touched && societeForm.get('email').invalid) {
+                            <p class="text-xs text-red-500 font-medium">{{ t('Invalid email format') }}</p>
+                            }
+                        </div>
+
+                        <!-- Phone 1 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Phone') }}
+                                1</label>
+                            <div class="relative">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                                <input type="text" [formControlName]="'telephone1'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    [placeholder]="'+216 -- --- ---'">
+                            </div>
+                        </div>
+
+                        <!-- Phone 2 -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Phone') }}
+                                2</label>
+                            <div class="relative">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                                <input type="text" [formControlName]="'telephone2'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    [placeholder]="'+216 -- --- ---'">
+                            </div>
+                        </div>
+
+                        <!-- Fax -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Fax')
+                                }}</label>
+                            <div class="relative">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+                                <input type="text" [formControlName]="'fax1'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    [placeholder]="'+216 -- --- ---'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Address -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                    <div
+                        class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ t('Legal & Address') }}</h3>
+                        <p class="text-sm text-gray-500">{{ t('Location and legal documents') }}</p>
+                    </div>
+                    <div class="p-8 grid grid-cols-1 gap-6">
+                        <!-- Address -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Address')
+                                }}</label>
+                            <div class="relative">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+                                <textarea [formControlName]="'adresse'" rows="4"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    [placeholder]="t('Rue, Ville, Code Postal...')"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="flex items-center justify-end gap-4 pt-2 pb-4">
+                    <button type="button" mat-stroked-button [routerLink]="['../']"
+                        class="inline-flex items-center px-6 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                        <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        {{ t('Cancel') }}
+                    </button>
+                    <button type="button" (click)="saveSociete()" [disabled]="societeForm.invalid" mat-flat-button
+                        class="inline-flex items-center px-8 py-2.5 rounded-lg text-sm font-semibold text-white primary-action-btn disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors">
+                        <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        {{ societe.societeId ? t('Update-Company') : t('Create-Company') }}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

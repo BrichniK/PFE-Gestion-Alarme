@@ -24,7 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="EndPoints\" />
       <Folder Include="Public\" />
       <Folder Include="Reports\" />
       <Folder Include="uploads\" />

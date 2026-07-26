@@ -1,0 +1,3 @@
+namespace CollectManagement.Application.Features.SMSConfigurations.Commands.UpdateSMSConfiguration;
+
+public record UpdateSMSConfigurationResponse(Ulid SMSConfigurationId);

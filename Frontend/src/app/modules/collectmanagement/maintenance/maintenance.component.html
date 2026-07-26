@@ -1,0 +1,401 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 bg-white dark:bg-slate-800 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
+                    t('Fichier') }}</a>
+                <mat-icon class="icon-size-4 mx-2 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                <span>{{ t('Ordre de maintenance') }}</span>
+            </div>
+            <!-- Title -->
+            <div class="mt-2 flex items-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+                    {{ t('Ordre de maintenance') }}
+                </h2>
+                <span
+                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {{ displayedMaintenancesLength }} / {{ maintenancesLength }} {{ t('Total') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-3">
+            <!-- Status Filter -->
+            <div
+                class="flex p-0.5 bg-gray-100 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600">
+                <button type="button" (click)="setStatus('all')"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all"
+                    [class.bg-blue-600]="statusFilter.value === 'all'" \
+                    [class.text-white]="statusFilter.value === 'all'" [class.shadow-sm]="statusFilter.value === 'all'"
+                    [class.bg-white-200]="statusFilter.value !== 'all'"
+                    [class.text-gray-700]="statusFilter.value !== 'all'"
+                    [class.dark:bg-slate-600]="statusFilter.value !== 'all'"
+                    [class.dark:text-gray-300]="statusFilter.value !== 'all'">
+
+
+                    {{ t('Tous') }}
+                </button>
+                <button type="button" (click)="setStatus('affecte')"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all"
+                    [class.bg-orange-600]="statusFilter.value === 'affecte'"
+                    [class.text-white]="statusFilter.value === 'affecte'"
+                    [class.bg-white-200]="statusFilter.value !== 'affecte'"
+                    [class.text-gray-700]="statusFilter.value !== 'affecte'"
+                    [class.dark:bg-slate-600]="statusFilter.value !== 'affecte'"
+                    [class.dark:text-gray-300]="statusFilter.value !== 'affecte'">
+                    {{ t('Affecté') }}
+                </button>
+                <button type="button" (click)="setStatus('diagnostique')"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all"
+                    [class.bg-blue-600]="statusFilter.value === 'diagnostique'"
+                    [class.text-white]="statusFilter.value === 'diagnostique'"
+                    [class.bg-white-200]="statusFilter.value !== 'diagnostique'"
+                    [class.text-gray-700]="statusFilter.value !== 'diagnostique'"
+                    [class.dark:bg-slate-600]="statusFilter.value !== 'diagnostique'"
+                    [class.dark:text-gray-300]="statusFilter.value !== 'diagnostique'">
+                    {{ t('Diagnostique') }}
+                </button>
+                <button type="button" (click)="setStatus('reparation')"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all"
+                    [class.bg-yellow-500]="statusFilter.value === 'reparation'"
+                    [class.text-white]="statusFilter.value === 'reparation'"
+                    [class.bg-white-200]="statusFilter.value !== 'reparation'"
+                    [class.text-gray-700]="statusFilter.value !== 'reparation'"
+                    [class.dark:bg-slate-600]="statusFilter.value !== 'reparation'"
+                    [class.dark:text-gray-300]="statusFilter.value !== 'reparation'">
+                    {{ t('Réparation') }}
+                </button>
+                <button type="button" (click)="setStatus('done')"
+                    class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all"
+                    [class.bg-green-600]="statusFilter.value === 'done'"
+                    [class.text-white]="statusFilter.value === 'done'"
+                    [class.bg-gray-100]="statusFilter.value !== 'done'"
+                    [class.text-gray-700]="statusFilter.value !== 'done'"
+                    [class.dark:bg-slate-600]="statusFilter.value !== 'done'"
+                    [class.dark.text-gray-300]="statusFilter.value !== 'done'">
+                    {{ t('Fin') }}
+                </button>
+            </div>
+
+<!--            <div class="relative flex-1 sm:grow-0">-->
+<!--                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">-->
+<!--                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>-->
+<!--                </span>-->
+<!--                <input type="text" [formControl]="searchInputControl" [placeholder]="t('Rechercher...')"-->
+<!--                    class="w-full sm:w-64 sm:flex-none bg-gray-50 border border-gray-200 rounded-md pl-10 pr-4 py-2 text-gray-600 dark:bg-slate-800 dark:text-white dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"-->
+<!--                    (change)="SortChange()">-->
+<!--            </div>-->
+
+            <div class="flex items-center gap-2">
+                <mat-form-field class="w-[340px] text-xs" subscriptSizing="dynamic">
+                    <mat-date-range-input [rangePicker]="maintenanceDateRangePicker">
+                        <input matStartDate [formControl]="fromDateFilter" [placeholder]="t('Du')">
+                        <input matEndDate [formControl]="toDateFilter" [placeholder]="t('Au')">
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matIconSuffix [for]="maintenanceDateRangePicker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #maintenanceDateRangePicker></mat-date-range-picker>
+                </mat-form-field>
+                <button type="button" mat-stroked-button class="!h-9" (click)="clearHeaderFilters()">
+                    {{ t('Reset') }}
+                </button>
+            </div>
+
+            <!-- Add button -->
+<!--            <button *ngIf="hasActionPermission('Add')" mat-flat-button [color]="'primary'"-->
+<!--                (click)="CreateMaintenance()">-->
+<!--                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:plus'"></mat-icon>-->
+<!--                <span class="ml-2 mr-1">{{ t('Ajouter') }}</span>-->
+<!--            </button>-->
+        </div>
+    </div>
+
+    <!-- Maintenances list -->
+    <div class="flex flex-col flex-auto sm:overflow-hidden">
+        <!-- Table -->
+        <div class="flex flex-col flex-auto overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" [ngClass]="{'cursor-pointer': !selectedMaintenance}"
+                    (click)="selectedMaintenance ? null : SortChange()">
+                    <thead class="bg-gray-100 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <th class="p-4 font-semibold text-sm text-gray-600 dark:text-gray-200 border-b">
+                                {{ t('Statut') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm text-gray-600 dark:text-gray-200 border-b">
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ t('Appareil') }}</span>
+                                    <button
+                                        type="button"
+                                        mat-icon-button
+                                        class="!w-6 !h-6"
+                                        (click)="$event.stopPropagation()"
+                                        [matMenuTriggerFor]="deviceFilterMenu"
+                                        [matTooltip]="t('Filtrer appareil')">
+                                        <mat-icon class="icon-size-4" [ngClass]="hasActiveDeviceFilter() ? 'text-blue-600' : 'text-gray-400'"
+                                            [svgIcon]="'heroicons_outline:funnel'"></mat-icon>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="p-4 font-semibold text-sm text-gray-600 dark:text-gray-200 border-b">
+                                {{ t('Type d\'alerte') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm text-gray-600 dark:text-gray-200 border-b">
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ t('Employé') }}</span>
+                                    <button
+                                        type="button"
+                                        mat-icon-button
+                                        class="!w-6 !h-6"
+                                        (click)="$event.stopPropagation()"
+                                        [matMenuTriggerFor]="employeeFilterMenu"
+                                        [matTooltip]="t('Filtrer employé')">
+                                        <mat-icon class="icon-size-4" [ngClass]="hasActiveEmployeeFilter() ? 'text-blue-600' : 'text-gray-400'"
+                                            [svgIcon]="'heroicons_outline:funnel'"></mat-icon>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #ec0c0c">
+                                {{ t('Alerte') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #ec0c0c">
+                                Durée d'alerte
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #F97316">
+                                {{ t('Affectation') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #F97316">
+                                Durée d'attente
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #3B82F6">
+                                {{ t('Diagnostique') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #3B82F6">
+                                Durée de diagnostique
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #28834b">
+                                {{ t('Reparation') }}
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #28834b">
+                                Durée de réparation
+                            </th>
+                            <th class="p-4 font-semibold text-sm border-b" style="color: #28834b">
+                                {{ t('Fin') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                        <ng-container *ngIf="maintenances$ | async as maintenances">
+                            <tr *ngFor="let maintenance of maintenances; trackBy: trackByFn"
+                                class="hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                (click)="toggleDetails(maintenance.maintenanceId)"
+                                [class.bg-primary-50]="selectedMaintenance?.maintenanceId === maintenance.maintenanceId"
+                                [class.dark:bg-primary-900]="selectedMaintenance?.maintenanceId === maintenance.maintenanceId">
+                                <td class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="flex items-center">
+                                        <span class="w-2 h-2 rounded-full mr-2" [ngClass]="{
+                                            'bg-gray-400': !maintenance.t1Alerte && !maintenance.t3Arrival,
+                                            'bg-orange-500': !maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'bg-blue-500': maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'bg-yellow-500': maintenance.t3Arrival && maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'bg-green-500': maintenance.t3Arrival && maintenance.t4Completion && maintenance.t5Confirmation
+                                        }"></span>
+                                        <span class="text-xs font-medium uppercase" [ngClass]="{
+                                            'text-orange-600': !maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'text-blue-600': maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'text-yellow-600': maintenance.t3Arrival && maintenance.t4Completion && !maintenance.t5Confirmation,
+                                            'text-green-600': maintenance.t3Arrival && maintenance.t4Completion && maintenance.t5Confirmation
+                                        }">
+                                            {{ (!maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation) ? 'Affecté' :
+                                            (maintenance.t3Arrival && !maintenance.t4Completion && !maintenance.t5Confirmation) ? 'Diagnostique' :
+                                            (maintenance.t3Arrival && maintenance.t4Completion && !maintenance.t5Confirmation) ? 'Réparation' :
+                                            'Fin' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ getDeviceName(maintenance.deviceId) }}
+                                </td>
+                                <td class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ getAlerteTypeName(maintenance.deviceId) }}
+                                </td>
+                                <td class="p-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ getEmployeeName(maintenance.employeeId) }}
+                                </td>
+                                <td class="p-4 text-sm text-red-600 dark:text-red-400">
+                                    {{ maintenance.t1Alerte | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                                <td class="p-4 text-sm font-mono font-semibold" style="color: #ec0c0c">
+                                    {{ getDuration(maintenance.t1Alerte, maintenance.t2Assignment) }}
+                                </td>
+                                <td class="p-4 text-sm text-amber-600 dark:text-amber-400">
+                                    {{ maintenance.t2Assignment | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                                <td class="p-4 text-sm font-mono font-semibold" style="color: #F97316">
+                                    {{ getDuration(maintenance.t2Assignment, maintenance.t3Arrival) }}
+                                </td>
+                                <td class="p-4 text-sm text-blue-600 dark:text-amber-blue">
+                                    {{ maintenance.t3Arrival | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                                <td class="p-4 text-sm font-mono font-semibold" style="color: #3B82F6">
+                                    {{ getDuration(maintenance.t3Arrival, maintenance.t4Completion) }}
+                                </td>
+                                <td class="p-4 text-sm text-green-800 dark:text-green-400">
+                                    {{ maintenance.t4Completion | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                                <td class="p-4 text-sm font-mono font-semibold" style="color: #28834b">
+                                    {{ getDuration(maintenance.t4Completion, maintenance.t5Confirmation) }}
+                                </td>
+                                <td class="p-4 text-sm font-mono font-semibold" style="color: #28834b">
+                                    {{ maintenance.t5Confirmation | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </table>
+
+                <mat-menu #deviceFilterMenu="matMenu" xPosition="after" yPosition="below">
+                    <button mat-menu-item (click)="clearDeviceHeaderFilter(); $event.stopPropagation()">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        {{ t('Tous appareils') }}
+                    </button>
+                    <button mat-menu-item *ngFor="let device of devices"
+                        (click)="toggleDeviceHeaderFilter(device.deviceId); $event.stopPropagation()">
+                        <mat-icon *ngIf="isDeviceFilterSelected(device.deviceId)" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        <mat-icon *ngIf="!isDeviceFilterSelected(device.deviceId)" [svgIcon]="'heroicons_outline:minus'"></mat-icon>
+                        {{ device.deviceName || device.matricule || device.deviceId }}
+                    </button>
+                </mat-menu>
+
+                <mat-menu #employeeFilterMenu="matMenu" xPosition="after" yPosition="below">
+                    <button mat-menu-item (click)="clearEmployeeHeaderFilter(); $event.stopPropagation()">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        {{ t('Tous employés') }}
+                    </button>
+                    <button mat-menu-item *ngFor="let employee of employees"
+                        (click)="toggleEmployeeHeaderFilter(employee.employeeId); $event.stopPropagation()">
+                        <mat-icon *ngIf="isEmployeeFilterSelected(employee.employeeId)" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        <mat-icon *ngIf="!isEmployeeFilterSelected(employee.employeeId)" [svgIcon]="'heroicons_outline:minus'"></mat-icon>
+                        {{ employee.nom }} {{ employee.prenom }}
+                    </button>
+                </mat-menu>
+            </div>
+
+            <!-- Paginator -->
+            <mat-paginator [length]="displayedMaintenancesLength" (page)="SortChange()" [pageSizeOptions]="[10, 20, 30]"
+                [pageSize]="10" [showFirstLastButtons]="true"
+                class="w-full border-t border-gray-200 bg-white dark:bg-slate-800"></mat-paginator>
+        </div>
+    </div>
+
+    <!-- Details panel -->
+    <ng-container *ngIf="selectedMaintenance">
+        <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity" (click)="closeDetails()"></div>
+        <div
+            class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-slate-800 shadow-xl overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b bg-gray-50 dark:bg-slate-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ selectedMaintenance.maintenanceId === 'new' ? 'Nouvelle Maintenance' : 'Détails de la Maintenance' }}
+                </h3>
+                <button mat-icon-button (click)="closeDetails()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6">
+                <form [formGroup]="selectedMaintenanceForm" class="opacity-50 pointer-events-none">
+                    <div class="space-y-4">
+                        <mat-form-field class="w-full">
+                            <mat-label>Appareil</mat-label>
+                            <mat-select formControlName="deviceId">
+                                <mat-option *ngFor="let device of devices" [value]="device.deviceId">
+                                    {{ device.deviceName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label>Employé</mat-label>
+                            <mat-select formControlName="employeeId">
+                                <mat-option *ngFor="let employee of employees" [value]="employee.employeeId">
+                                    {{ employee.nom }} {{ employee.prenom }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label>Description</mat-label>
+                            <textarea matInput formControlName="description" rows="3"></textarea>
+                        </mat-form-field>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-gray-100 dark:bg-slate-700 rounded text-center">
+                                <div class="text-xs text-gray-500">Début d'alerte</div>
+                                <div class="font-mono text-sm font-semibold">
+                                    {{ selectedMaintenance.t1Alerte | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-100 dark:bg-slate-700 rounded text-center">
+                                <div class="text-xs text-gray-500">Affectation</div>
+                                <div class="font-mono text-sm font-semibold">
+                                    {{ selectedMaintenance.t2Assignment | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-100 dark:bg-slate-700 rounded text-center">
+                                <div class="text-xs text-gray-500">Début diagnostique</div>
+                                <div class="font-mono text-sm font-semibold">
+                                    {{ selectedMaintenance.t3Arrival | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-100 dark:bg-slate-700 rounded text-center">
+                                <div class="text-xs text-gray-500">Début de réparation</div>
+                                <div class="font-mono text-sm font-semibold">
+                                    {{ selectedMaintenance.t4Completion | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </div>
+                            </div>
+                            <div class="p-3 bg-gray-100 dark:bg-slate-700 rounded text-center">
+                                <div class="text-xs text-gray-500">Fin</div>
+                                <div class="font-mono text-sm font-semibold">
+                                    {{ selectedMaintenance.t5Confirmation | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- RFID Scan Section -->
+<!--                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">-->
+<!--                    <h4 class="text-md font-semibold mb-4 text-gray-900 dark:text-white">Scanner RFID</h4>-->
+<!--                    <div class="flex space-x-2">-->
+<!--                        <input type="text" [formControl]="rfidScanInput" placeholder="Scanner ou entrer RFID"-->
+<!--                            class="flex-1 bg-gray-50 border border-gray-200 rounded-md px-4 py-2 text-sm dark:bg-slate-800 dark:border-slate-600">-->
+<!--                        <button mat-flat-button color="primary" (click)="ScanRfid()" [disabled]="isScanning">-->
+<!--                            <span *ngIf="!isScanning">Scanner</span>-->
+<!--                            <span *ngIf="isScanning">...</span>-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                    <div *ngIf="scanResult" class="mt-2 p-2 text-sm" [class.bg-green-100]="scanResult.success"-->
+<!--                        [class.text-green-800]="scanResult.success" [class.bg-red-100]="!scanResult.success"-->
+<!--                        [class.text-red-800]="!scanResult.success">-->
+<!--                        {{ scanResult.message }}-->
+<!--                    </div>-->
+<!--                    <div *ngIf="isRealtimeConnected" class="mt-2 text-xs text-green-600 flex items-center">-->
+<!--                        <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>-->
+<!--                        Connecté en temps réel-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+
+            <div class="p-4 border-t bg-gray-50 dark:bg-slate-700 flex justify-end space-x-2">
+                <button mat-button (click)="closeDetails()">Annuler</button>
+                <button mat-flat-button color="primary" (click)="SaveSelectedMaintenance()" [disabled]="saveClicked">
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+    </ng-container>
+</div>

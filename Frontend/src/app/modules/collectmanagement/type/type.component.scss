@@ -1,0 +1,15 @@
+.type-grid {
+    grid-template-columns: 40% 40% 20%;
+
+    @screen sm {
+        grid-template-columns: 40% 40% 20%;
+    }
+
+    @screen md {
+        grid-template-columns: 40% 40% 20%;
+    }
+
+    @screen lg {
+        grid-template-columns: 40% 40% 20%;
+    }
+}

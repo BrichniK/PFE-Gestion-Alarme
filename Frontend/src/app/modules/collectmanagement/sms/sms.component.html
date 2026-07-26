@@ -1,0 +1,240 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 bg-white dark:bg-slate-800 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
+                    t('Administration') }}</a>
+                <mat-icon class="icon-size-4 mx-2 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                <span>{{ t('SMS') }}</span>
+            </div>
+            <!-- Title -->
+            <div class="mt-2 flex items-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+                    {{ t('SMS') }}
+                </h2>
+                <span
+                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {{ smssLength }} {{ t('Total') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-3">
+            <div class="relative flex-1 sm:grow-0">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                </span>
+                <input type="text" [formControl]="searchInputControl" [placeholder]="t('Rechercher...')"
+                    class="block w-full sm:w-80 pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm">
+            </div>
+
+            @if (hasActionPermission(FuseNavigationAction.Add)) {
+            <button (click)="CreateSMS()"
+                class="inline-flex items-center px-8 py-3.5 rounded-xl shadow-lg text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transform active:scale-95 transition-all"
+                style="background-color: #2E6C9F; --tw-ring-color: #2E6C9F;">
+                <mat-icon class="icon-size-6 mr-2 text-white" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span>{{ t('New SMS') }}</span>
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-auto overflow-hidden p-6 sm:p-10">
+        <div
+            class="flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700">
+
+            <div class="flex-auto overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                        <tr
+                            class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                            <th class="pl-6 py-4 w-12 text-center">
+                                <input type="checkbox"
+                                    class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            </th>
+                            <th
+                                class="px-6 py-4 font-semibold uppercase tracking-wider cursor-pointer hover:text-indigo-600 transition-colors">
+                                <div class="flex items-center">
+                                    {{ t('Name') }}
+                                    <mat-icon class="icon-size-3 ml-1"
+                                        [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Phone Number') }}</th>
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Devices') }}</th>
+                            <th class="pr-6 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Actions') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                        @if(sms$ | async; as smss){
+                        @for( sms of smss; track trackByFn($index, sms)){
+                        <tr
+                            class="group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200 sms-table-row">
+                            <td class="pl-6 py-4 text-center">
+                                <input type="checkbox"
+                                    class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div
+                                        class="h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold uppercase ring-2 ring-gray-100 dark:ring-slate-700 shadow-sm">
+                                        {{ sms.nomPrenom.charAt(0) }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div
+                                            class="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+                                            {{ sms.nomPrenom }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-700 dark:text-gray-300">{{ sms.phoneNumber }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    @for(device of sms.devices; track device.deviceId){
+                                    <span
+                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ device.deviceName }}
+                                    </span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="pr-6 py-4 text-right">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <button mat-icon-button [matTooltip]="t('View')"
+                                        (click)="toggleDetails(sms.smsId)"
+                                        class="text-gray-400 hover:text-indigo-600 transition-colors">
+                                        <mat-icon class="icon-size-5"
+                                            [svgIcon]="selectedSMS?.smsId === sms.smsId ? 'heroicons_solid:chevron-up' : 'heroicons_outline:pencil-square'"></mat-icon>
+                                    </button>
+                                    @if(hasActionPermission(FuseNavigationAction.Delete)){
+                                    <button mat-icon-button [matTooltip]="t('Delete')"
+                                        (click)="deleteSelectedSMS(sms)"
+                                        class="text-gray-400 hover:text-red-600 transition-colors">
+                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Details Row (Expanded) -->
+                        @if(selectedSMS?.smsId === sms.smsId){
+                        <tr class="bg-gray-50/50 dark:bg-slate-700/20">
+                            <td colspan="5" class="px-0 py-0">
+                                <ng-container
+                                    *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: sms}"></ng-container>
+                            </td>
+                        </tr>
+                        }
+                        }
+                        } @else {
+                        <tr>
+                            <td colspan="5" class="py-20 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <mat-icon class="icon-size-16 text-gray-200 dark:text-gray-700"
+                                        [svgIcon]="'heroicons_outline:chat-bubble-left-right'"></mat-icon>
+                                    <p class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">{{ t('No SMS found') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div
+                class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('Showing') }} <span class="font-medium text-gray-900 dark:text-white">1</span> {{ t('to') }}
+                    <span class="font-medium text-gray-900 dark:text-white">10</span> {{ t('of') }} <span
+                        class="font-medium text-gray-900 dark:text-white">{{ smssLength }}</span> {{
+                    t('results') }}
+                </div>
+                <div class="flex items-center space-x-2">
+                    <mat-paginator class="bg-transparent" [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="smssLength" (page)="SortChange()" [pageSize]="10"
+                        [pageSizeOptions]="[5, 10, 25, 50, 100]" [showFirstLastButtons]="true"></mat-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail template -->
+    <ng-template #rowDetailsTemplate let-sms>
+        <div class="p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 shadow-inner">
+            <form class="flex flex-col w-full" [formGroup]="selectedSMSForm">
+                <div class="space-y-4">
+                    <!-- Row 1 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Name') }}</label>
+                            <div class="relative rounded-lg shadow-sm">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                                <input type="text" [formControlName]="'nomPrenom'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Phone Number') }}</label>
+                            <div class="relative rounded-lg shadow-sm">
+                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                                <input type="text" [formControlName]="'phoneNumber'"
+                                    class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 - Device Selection -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Devices') }}</label>
+                        <div class="border border-gray-300 dark:border-slate-700 rounded-xl p-4 bg-gray-50 dark:bg-slate-900 max-h-64 overflow-y-auto">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @for(device of devices; track device.deviceId){
+                                <label class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
+                                    <input type="checkbox" 
+                                        [checked]="isDeviceSelected(device.deviceId)"
+                                        (change)="onDeviceSelectionChange(device.deviceId, $event.target.checked)"
+                                        class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ device.deviceName }} ({{ device.matricule }})</span>
+                                </label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save bar -->
+                @if ((hasActionPermission(FuseNavigationAction.Edit) && sms.smsId !== 'new') ||
+                (hasActionPermission(FuseNavigationAction.Add) && sms.smsId === 'new')) {
+                <div
+                    class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-gray-100 dark:border-slate-700">
+                    <button (click)="closeDetails()"
+                        class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+                        {{ t('Cancel') }}
+                    </button>
+                    <button (click)="SaveSelectedSMS()" [disabled]="selectedSMSForm.invalid"
+                        class="inline-flex items-center px-8 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
+                        style="background-color: #2E6C9F;">
+                        <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        {{ t('Save SMS') }}
+                    </button>
+                </div>
+                }
+            </form>
+        </div>
+    </ng-template>
+</div>

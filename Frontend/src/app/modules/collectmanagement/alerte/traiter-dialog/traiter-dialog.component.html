@@ -1,0 +1,59 @@
+<div *transloco="let t">
+    <h2 mat-dialog-title class="traiter-dialog-title">
+        <span class="traiter-dialog-badge">{{ t('Affectation') }}</span>
+        <span>{{ t('Traiter Alerte') }}</span>
+    </h2>
+
+    <mat-dialog-content class="traiter-dialog-content min-w-80">
+        @if (isLoading) {
+            <div class="flex items-center justify-center p-8">
+                <mat-spinner [diameter]="40"></mat-spinner>
+            </div>
+        } @else if (groupes.length === 0) {
+            <div class="flex items-center justify-center p-8 text-hint">
+                {{ t('No employees found for this planning') }}
+            </div>
+        } @else {
+            <div class="flex flex-col gap-4 py-2">
+                <mat-radio-group [(ngModel)]="selectedEmployeeId" class="flex flex-col gap-4">
+                    @for (groupe of groupes; track groupe.groupeNom) {
+                        <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                                <mat-icon class="icon-size-5 text-primary" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                                <span class="text-sm font-semibold">{{ groupe.groupeNom }}</span>
+                                <span class="ml-auto text-xs text-hint">
+                                    {{ groupe.shiftLabel }}
+                                    @if (groupe.shiftStartTime && groupe.shiftEndTime) {
+                                        ({{ groupe.shiftStartTime }} - {{ groupe.shiftEndTime }})
+                                    }
+                                </span>
+                            </div>
+                            <div class="flex flex-col">
+                                @for (emp of groupe.employees; track emp.employeeId) {
+                                    <mat-radio-button [value]="emp.employeeId" class="border-b border-slate-100 px-4 py-2 last:border-b-0 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">
+                                        {{ emp.prenom }} {{ emp.nom }}
+                                    </mat-radio-button>
+                                }
+                                @if (groupe.employees.length === 0) {
+                                    <div class="px-4 py-2 text-xs italic text-hint">{{ t('Aucun employé') }}</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </mat-radio-group>
+            </div>
+        }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="traiter-dialog-actions">
+        <button mat-button (click)="cancel()">{{ t('Annuler') }}</button>
+        <button
+            mat-flat-button
+            class="traiter-confirm-button"
+            [disabled]="!selectedEmployeeId"
+            (click)="confirm()"
+        >
+            {{ t('Assigner a cet employe') }}
+        </button>
+    </mat-dialog-actions>
+</div>

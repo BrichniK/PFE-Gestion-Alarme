@@ -1,0 +1,15 @@
+.employee-grid {
+    grid-template-columns: 25% 25% 20% 15% 15%;
+
+    @screen sm {
+        grid-template-columns: 25% 20% 20% 15% 20%;
+    }
+
+    @screen md {
+        grid-template-columns: 25% 25% 20% 15% 15%;
+    }
+
+    @screen lg {
+        grid-template-columns: 25% 25% 20% 15% 15%;
+    }
+}

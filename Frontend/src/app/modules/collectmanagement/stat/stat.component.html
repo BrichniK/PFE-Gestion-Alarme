@@ -1,0 +1,266 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 bg-white dark:bg-slate-800 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
+                    t('Reporting') }}</a>
+                <mat-icon class="icon-size-4 mx-2 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                <span>{{ t('Statistiques') }}</span>
+            </div>
+            <!-- Title -->
+            <div class="mt-2 flex items-center">
+                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+                    {{ t('Statistiques Maintenance') }}
+                </h2>
+                <span
+                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {{ displayedStatsLength }} / {{ statsLength }} {{ t('Total') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-3">
+            <mat-form-field class="w-[340px] text-xs" subscriptSizing="dynamic">
+                <mat-date-range-input [rangePicker]="statDateRangePicker">
+                    <input matStartDate [formControl]="fromDateFilter" [placeholder]="t('Du')">
+                    <input matEndDate [formControl]="toDateFilter" [placeholder]="t('Au')">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="statDateRangePicker"></mat-datepicker-toggle>
+                <mat-date-range-picker #statDateRangePicker></mat-date-range-picker>
+            </mat-form-field>
+
+<!--            <div class="relative flex-1 sm:grow-0">-->
+<!--                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">-->
+<!--                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>-->
+<!--                </span>-->
+<!--                <input type="text" [formControl]="searchInputControl" [placeholder]="t('Rechercher...')"-->
+<!--                    class="block w-full sm:w-80 pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm">-->
+<!--            </div>-->
+
+<!--            <button type="button" mat-stroked-button class="!h-10" (click)="clearAllFilters()">-->
+<!--                {{ t('Reset') }}-->
+<!--            </button>-->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-auto overflow-hidden p-6 sm:p-10">
+        <div
+            class="flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700">
+
+            <div class="flex-auto overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1100px]">
+                    <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-slate-800/95 backdrop-blur shadow-sm">
+                        <tr
+                            class="text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider">
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ t('Appareil') }}</span>
+                                    <button
+                                        type="button"
+                                        mat-icon-button
+                                        class="!w-6 !h-6"
+                                        (click)="$event.stopPropagation()"
+                                        [matMenuTriggerFor]="deviceFilterMenu"
+                                        [matTooltip]="t('Filtrer appareil')">
+                                        <mat-icon class="icon-size-4" [ngClass]="hasActiveDeviceFilter() ? 'text-blue-600' : 'text-gray-400'"
+                                            [svgIcon]="'heroicons_outline:funnel'"></mat-icon>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider">
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ t('Employé') }}</span>
+                                    <button
+                                        type="button"
+                                        mat-icon-button
+                                        class="!w-6 !h-6"
+                                        (click)="$event.stopPropagation()"
+                                        [matMenuTriggerFor]="employeeFilterMenu"
+                                        [matTooltip]="t('Filtrer employé')">
+                                        <mat-icon class="icon-size-4" [ngClass]="hasActiveEmployeeFilter() ? 'text-blue-600' : 'text-gray-400'"
+                                            [svgIcon]="'heroicons_outline:funnel'"></mat-icon>
+                                    </button>
+                                </div>
+                            </th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider">{{ t('T3 Arrivée') }}</th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider">{{ t('T4 Fin') }}</th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Durée De
+                                Réparation') }}</th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Durée Totale
+                                Alerte') }}</th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider">{{ t('Type') }}</th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Consigne') }}
+                            </th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Écart') }}
+                            </th>
+                            <th class="px-4 py-4 font-semibold uppercase tracking-wider text-center">{{ t('Statut') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                        @if(stats$ | async; as stats){
+                        @for(stat of stats; track trackByFn($index, stat)){
+                        <tr class="group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200"
+                            [ngClass]="{
+                                'bg-red-50/50 dark:bg-red-900/10': stat.isDepassement,
+                                'bg-green-50/30 dark:bg-green-900/5': !stat.isDepassement && stat.dureeNominal != null
+                            }">
+                            <!-- Appareil -->
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center">
+                                    <div
+                                        class="h-8 w-8 flex flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 text-xs font-bold">
+                                        <mat-icon class="icon-size-4"
+                                            [svgIcon]="'heroicons_outline:device-tablet'"></mat-icon>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                                        {{ stat.deviceName ?? '-' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <!-- Employé -->
+                            <td class="px-4 py-3.5">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ stat.employeeName ?? '-'
+                                    }}</span>
+                            </td>
+                            <!-- T3 -->
+                            <td class="px-4 py-3.5">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ stat.t3Arrival | date:'dd/MM/yyyy HH:mm' }}
+                                </span>
+                            </td>
+                            <!-- T4 -->
+                            <td class="px-4 py-3.5">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ stat.t4Completion | date:'dd/MM/yyyy HH:mm' }}
+                                </span>
+                            </td>
+                            <!-- Durée Réelle -->
+                            <td class="px-4 py-3.5 text-right">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {{ stat.dureeReel | duration }}
+                                </span>
+                            </td>
+                            <!-- Durée Totale Alerte -->
+                            <td class="px-4 py-3.5 text-right">
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    {{ stat.dureeTotalAlerte | duration }}
+                                </span>
+                            </td>
+                            <!-- Type -->
+                            <td class="px-4 py-3.5">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ stat.typeLabel ?? '-'
+                                    }}</span>
+                            </td>
+                            <!-- Durée Nominale -->
+                            <td class="px-4 py-3.5 text-right">
+                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    {{ stat.dureeNominal | duration }}
+                                </span>
+                            </td>
+                            <!-- Écart -->
+                            <td class="px-4 py-3.5 text-right">
+                                @if(stat.ecart != null) {
+                                <span class="text-sm font-medium" [ngClass]="{
+                                        'text-red-600 dark:text-red-400': stat.ecart > 0,
+                                        'text-green-600 dark:text-green-400': stat.ecart <= 0
+                                    }">
+                                    {{ stat.ecart > 0 ? '+' : '' }}{{ stat.ecart | duration }}
+                                </span>
+                                } @else {
+                                <span class="text-sm text-gray-400">-</span>
+                                }
+                            </td>
+                            <!-- Statut -->
+                            <td class="px-4 py-3.5 text-center">
+                                @if(stat.dureeNominal != null) {
+                                @if(stat.isDepassement) {
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-800">
+                                    <mat-icon class="icon-size-3.5 mr-1"
+                                        [svgIcon]="'heroicons_solid:exclamation-triangle'"></mat-icon>
+                                    {{ t('Dépassement') }}
+                                </span>
+                                } @else {
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 ring-1 ring-green-200 dark:ring-green-800">
+                                    <mat-icon class="icon-size-3.5 mr-1"
+                                        [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                                    {{ t('OK') }}
+                                </span>
+                                }
+                                } @else {
+                                <span class="text-sm text-gray-400">-</span>
+                                }
+                            </td>
+                        </tr>
+                        }
+                        } @else {
+                        <tr>
+                            <td colspan="10" class="py-20 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <mat-icon class="icon-size-16 text-gray-200 dark:text-gray-700"
+                                        [svgIcon]="'heroicons_outline:chart-bar-square'"></mat-icon>
+                                    <p class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">{{ t('Aucune
+                                        statistique trouvée') }}</p>
+                                    <p class="mt-1 text-sm text-gray-400 dark:text-gray-500">{{ t('Les statistiques
+                                        apparaîtront lorsque des maintenances seront complétées') }}</p>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <mat-menu #deviceFilterMenu="matMenu" xPosition="after" yPosition="below">
+                    <button mat-menu-item (click)="clearDeviceHeaderFilter(); $event.stopPropagation()">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        {{ t('Tous appareils') }}
+                    </button>
+                    <button mat-menu-item *ngFor="let device of devices"
+                        (click)="toggleDeviceHeaderFilter(device.deviceId); $event.stopPropagation()">
+                        <mat-icon *ngIf="isDeviceFilterSelected(device.deviceId)" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        <mat-icon *ngIf="!isDeviceFilterSelected(device.deviceId)" [svgIcon]="'heroicons_outline:minus'"></mat-icon>
+                        {{ device.deviceName || device.matricule || device.deviceId }}
+                    </button>
+                </mat-menu>
+
+                <mat-menu #employeeFilterMenu="matMenu" xPosition="after" yPosition="below">
+                    <button mat-menu-item (click)="clearEmployeeHeaderFilter(); $event.stopPropagation()">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        {{ t('Tous employés') }}
+                    </button>
+                    <button mat-menu-item *ngFor="let employee of employees"
+                        (click)="toggleEmployeeHeaderFilter(employee.employeeId); $event.stopPropagation()">
+                        <mat-icon *ngIf="isEmployeeFilterSelected(employee.employeeId)" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                        <mat-icon *ngIf="!isEmployeeFilterSelected(employee.employeeId)" [svgIcon]="'heroicons_outline:minus'"></mat-icon>
+                        {{ employee.nom }} {{ employee.prenom }}
+                    </button>
+                </mat-menu>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div
+                class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('Total') }}: <span class="font-medium text-gray-900 dark:text-white">{{ displayedStatsLength }}</span>
+                    {{
+                    t('résultats') }}
+                </div>
+                <div class="flex items-center space-x-2">
+                    <mat-paginator class="bg-transparent" [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="displayedStatsLength" (page)="onPageChange()" [pageSize]="10"
+                        [pageSizeOptions]="[5, 10, 25, 50, 100]" [showFirstLastButtons]="true"></mat-paginator>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

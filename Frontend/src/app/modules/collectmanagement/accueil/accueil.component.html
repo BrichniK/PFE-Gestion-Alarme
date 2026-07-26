@@ -1,0 +1,585 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+    <!-- Main Content -->
+    <div class="flex-auto overflow-auto p-4 sm:p-6 space-y-6">
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Total Alertes -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 p-6 cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg"
+                routerLink="/fichier/alerte">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div
+                            class="flex items-center justify-center w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30">
+                            <mat-icon class="icon-size-6 text-red-500"
+                                [svgIcon]="'heroicons_outline:bell-alert'"></mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ totalAlerts }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('Alertes Actifs') }}</p>
+                        </div>
+                    </div>
+<!--                    <div class="flex flex-col items-end">-->
+<!--                        <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="{-->
+<!--                                'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30': alertsTrend < 0,-->
+<!--                                'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/30': alertsTrend > 0,-->
+<!--                                'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/30': alertsTrend === 0-->
+<!--                            }">-->
+<!--                            <span class="flex items-center">-->
+<!--                                <mat-icon *ngIf="alertsTrend !== 0" class="icon-size-3 mr-1"-->
+<!--                                    [svgIcon]="alertsTrend > 0 ? 'heroicons_solid:arrow-trending-up' : 'heroicons_solid:arrow-trending-down'"></mat-icon>-->
+<!--                                {{ alertsTrend }}%-->
+<!--                            </span>-->
+<!--                        </span>-->
+<!--&lt;!&ndash;                        <span class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('vs last week') }}</span>&ndash;&gt;-->
+<!--                    </div>-->
+                </div>
+            </div>
+
+            <!-- Maintenance en cours -->
+<!--            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 p-6 cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg"-->
+<!--                routerLink="/fichier/maintenance">-->
+<!--                <div class="flex items-center justify-between">-->
+<!--                    <div class="flex items-center">-->
+<!--                        <div-->
+<!--                            class="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30">-->
+<!--                            <mat-icon class="icon-size-6 text-blue-500"-->
+<!--                                [svgIcon]="'heroicons_outline:wrench'"></mat-icon>-->
+<!--                        </div>-->
+<!--                        <div class="ml-4">-->
+<!--                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ recentMaintenances.length }}</p>-->
+<!--                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('Maintenance en cours')-->
+<!--                                }}</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="flex flex-col items-end">-->
+<!--                        <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="{-->
+<!--                                'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30': maintenanceTrend < 0,-->
+<!--                                'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/30': maintenanceTrend > 0,-->
+<!--                                'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/30': maintenanceTrend === 0-->
+<!--                            }">-->
+<!--                            <span class="flex items-center">-->
+<!--                                <mat-icon *ngIf="maintenanceTrend !== 0" class="icon-size-3 mr-1"-->
+<!--                                    [svgIcon]="maintenanceTrend > 0 ? 'heroicons_solid:arrow-trending-up' : 'heroicons_solid:arrow-trending-down'"></mat-icon>-->
+<!--                                {{ maintenanceTrend }}%-->
+<!--                            </span>-->
+<!--                        </span>-->
+<!--&lt;!&ndash;                        <span class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('vs last week') }}</span>&ndash;&gt;-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <!-- Dispositifs -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 p-6 cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg"
+                routerLink="/fichier/device">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div
+                            class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30">
+                            <mat-icon class="icon-size-6 text-green-500"
+                                [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ connectedDevices }}/{{ totalDevices }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('Machine') }}</p>
+                        </div>
+                    </div>
+<!--                    <div class="flex flex-col items-end">-->
+<!--                        <span class="text-xs font-bold px-2 py-1 rounded-full" [ngClass]="{-->
+<!--                                'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/30': devicesTrend > 0,-->
+<!--                                'text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900/30': devicesTrend < 0,-->
+<!--                                'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/30': devicesTrend === 0-->
+<!--                            }">-->
+<!--                            <span class="flex items-center">-->
+<!--                                <mat-icon *ngIf="devicesTrend !== 0" class="icon-size-3 mr-1"-->
+<!--                                    [svgIcon]="devicesTrend > 0 ? 'heroicons_solid:arrow-trending-up' : 'heroicons_solid:arrow-trending-down'"></mat-icon>-->
+<!--                                {{ devicesTrend }}%-->
+<!--                            </span>-->
+<!--                        </span>-->
+<!--&lt;!&ndash;                        <span class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('vs last week') }}</span>&ndash;&gt;-->
+<!--                    </div>-->
+                </div>
+            </div>
+
+            <!-- Employés du planning aujourd'hui -->
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 p-6 cursor-pointer transition-transform hover:scale-[1.02] hover:shadow-lg"
+                routerLink="/fichier/planning">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center">
+                        <div
+                            class="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30">
+                            <mat-icon class="icon-size-6 text-purple-500"
+                                [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ totalEmployees }}/{{ totalAllEmployees }}</p>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('Employés planifiés') }}</p>
+                        </div>
+                    </div>
+                    <!-- Today's employee avatars on the right -->
+                    @if (todayEmployees.length > 0) {
+                    <div class="flex flex-wrap justify-end gap-1.5 max-w-[100px]">
+                        @for (emp of todayEmployees; track emp.employeeId) {
+                        <span class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-purple-200 dark:bg-purple-800 text-xs font-bold text-purple-700 dark:text-purple-200 cursor-default"
+                            [matTooltip]="(emp.nom || '') + ' ' + (emp.prenom || '')"
+                            matTooltipPosition="above">
+                            {{ (emp.nom || '?')[0] }}{{ (emp.prenom || '?')[0] }}
+                        </span>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Two Column Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <!-- Alertes Récentes -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700"
+                    style="background-color: #ec0c0c;">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-white mr-2"
+                            [svgIcon]="'heroicons_outline:bell-alert'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-white">{{ t('Alertes Récentes') }}</h3>
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ recentAlerts.length }}
+                        </span>
+                    </div>
+                    <a routerLink="/fichier/alerte"
+                        class="inline-flex items-center text-sm font-medium text-white transition-colors hover:opacity-80">
+                        {{ t('Voir tout') }}
+                        <mat-icon class="icon-size-4 ml-1 text-white" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-4 py-2.5">{{ t('Date') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Dispositif') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Type') }}</th>
+                                <th class="px-4 py-2.5 text-right">{{ t('Durée') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @for (alerte of paginatedAlerts; track alerte.alerteId) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300">{{ alerte.date |
+                                    date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300">{{
+                                    alerte.dispositifName || alerte.device }}</td>
+                                <td class="px-4 py-2.5">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                        {{ getTypeLabelById(alerte.typeId) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap text-right">{{ calcDuree(alerte.date, alerte.dur ?? alerte.Dur) }}</td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="4" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    {{ t('Aucune alerte récente') }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (recentAlerts.length > pageSize) {
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ alertsPage * pageSize + 1 }}-{{ (alertsPage + 1) * pageSize > recentAlerts.length ? recentAlerts.length : (alertsPage + 1) * pageSize }} / {{ recentAlerts.length }}</span>
+                        <div class="flex gap-1">
+                            <button mat-icon-button [disabled]="alertsPage === 0" (click)="alertsPage = alertsPage - 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [disabled]="alertsPage >= totalPages(recentAlerts) - 1" (click)="alertsPage = alertsPage + 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Maintenance Affectée -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700"
+                    style="background-color: #F97316;">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-white mr-2"
+                            [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-white">{{ t('Affecté') }}</h3>
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ todoMaintenances.length }}
+                        </span>
+                    </div>
+                    <a routerLink="/fichier/maintenance"
+                        class="inline-flex items-center text-sm font-medium text-white transition-colors hover:opacity-80">
+                        {{ t('Voir tout') }}
+                        <mat-icon class="icon-size-4 ml-1 text-white" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-4 py-2.5">{{ t('Employé') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Dispositif') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Type') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Affectation') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Description') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Statut') }}</th>
+                                <th class="px-4 py-2.5 text-right">{{ t('Durée') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @for (m of paginatedTodo; track m.maintenanceId) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-4 py-2.5 text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                                    {{ m.employeeNom ? (m.employeeNom + ' ' + (m.employeePrenom || '')) : m.employeeId }}
+                                </td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+                                    {{ getMaintenanceDeviceLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {{ getMaintenanceTypeLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
+                                    m.t2Assignment | date:'dd/MM HH:mm' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                                    {{ m.description }}</td>
+                                <td class="px-4 py-2.5">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                                        {{ t('Affecté') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap text-right">{{ calcDuree(m.t2Assignment) }}</td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    {{ t('Aucune maintenance affectée') }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (todoMaintenances.length > pageSize) {
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ todoPage * pageSize + 1 }}-{{ (todoPage + 1) * pageSize > todoMaintenances.length ? todoMaintenances.length : (todoPage + 1) * pageSize }} / {{ todoMaintenances.length }}</span>
+                        <div class="flex gap-1">
+                            <button mat-icon-button [disabled]="todoPage === 0" (click)="todoPage = todoPage - 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [disabled]="todoPage >= totalPages(todoMaintenances) - 1" (click)="todoPage = todoPage + 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <!-- Second Row: Diagnostique + Réparation -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            <!-- Diagnostique -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700"
+                    style="background-color: #3B82F6;">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-white mr-2"
+                            [svgIcon]="'heroicons_outline:magnifying-glass-circle'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-white">{{ t('Diagnostique') }}</h3>
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ diagnostiqueMaintenances.length }}
+                        </span>
+                    </div>
+                    <a routerLink="/fichier/maintenance"
+                        class="inline-flex items-center text-sm font-medium text-white transition-colors hover:opacity-80">
+                        {{ t('Voir tout') }}
+                        <mat-icon class="icon-size-4 ml-1 text-white" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-4 py-2.5">{{ t('Employé') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Dispositif') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Type') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Début diagnostique') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Description') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Statut') }}</th>
+                                <th class="px-4 py-2.5 text-right">{{ t('Durée') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @for (m of paginatedDiag; track m.maintenanceId) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-4 py-2.5 text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                                    {{ m.employeeNom ? (m.employeeNom + ' ' + (m.employeePrenom || '')) : m.employeeId }}
+                                </td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+                                    {{ getMaintenanceDeviceLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {{ getMaintenanceTypeLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
+                                    m.t3Arrival | date:'dd/MM HH:mm' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                                    {{ m.description }}</td>
+                                <td class="px-4 py-2.5">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ t('Diagnostique') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap text-right">{{ calcDuree(m.t3Arrival) }}</td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    {{ t('Aucune maintenance en diagnostique') }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (diagnostiqueMaintenances.length > pageSize) {
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ diagPage * pageSize + 1 }}-{{ (diagPage + 1) * pageSize > diagnostiqueMaintenances.length ? diagnostiqueMaintenances.length : (diagPage + 1) * pageSize }} / {{ diagnostiqueMaintenances.length }}</span>
+                        <div class="flex gap-1">
+                            <button mat-icon-button [disabled]="diagPage === 0" (click)="diagPage = diagPage - 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [disabled]="diagPage >= totalPages(diagnostiqueMaintenances) - 1" (click)="diagPage = diagPage + 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Réparation -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700"
+                    style="background-color: #28834b;">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-white mr-2"
+                            [svgIcon]="'heroicons_outline:wrench'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-white">{{ t('Réparation') }}
+                        </h3>
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ recentMaintenances.length }}
+                        </span>
+                    </div>
+                    <a routerLink="/fichier/maintenance"
+                        class="inline-flex items-center text-sm font-medium text-white transition-colors hover:opacity-80">
+                        {{ t('Voir tout') }}
+                        <mat-icon class="icon-size-4 ml-1 text-white" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-4 py-2.5">{{ t('Employé') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Dispositif') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Type') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Début de réparation') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Description') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Statut') }}</th>
+                                <th class="px-4 py-2.5 text-right">{{ t('Durée') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @for (m of paginatedReparation; track m.maintenanceId) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ m.employeeNom ? (m.employeeNom + ' ' + (m.employeePrenom || '')) : m.employeeId
+                                    }}
+                                </td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+                                    {{ getMaintenanceDeviceLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {{ getMaintenanceTypeLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300">{{ m.t4Completion |
+                                    date:'dd/MM HH:mm' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                                    {{ m.description }}</td>
+                                <td class="px-4 py-2.5">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        {{ t('Réparation') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap text-right">{{ calcDuree(m.t4Completion) }}</td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    {{ t('Aucune maintenance en réparation') }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (recentMaintenances.length > pageSize) {
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ reparationPage * pageSize + 1 }}-{{ (reparationPage + 1) * pageSize > recentMaintenances.length ? recentMaintenances.length : (reparationPage + 1) * pageSize }} / {{ recentMaintenances.length }}</span>
+                        <div class="flex gap-1">
+                            <button mat-icon-button [disabled]="reparationPage === 0" (click)="reparationPage = reparationPage - 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [disabled]="reparationPage >= totalPages(recentMaintenances) - 1" (click)="reparationPage = reparationPage + 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <!-- Third Row: Fin + Doughnut Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700"
+                    style="background-color: #28834b;">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-white mr-2"
+                            [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-white">{{ t('Fin') }}</h3>
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ doneMaintenances.length }}
+                        </span>
+                    </div>
+                    <a routerLink="/fichier/maintenance"
+                        class="inline-flex items-center text-sm font-medium text-white transition-colors hover:opacity-80">
+                        {{ t('Voir tout') }}
+                        <mat-icon class="icon-size-4 ml-1 text-white" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-gray-50 dark:bg-slate-800/50 text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-4 py-2.5">{{ t('Employé') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Dispositif') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Type') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Début alerte') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Description') }}</th>
+                                <th class="px-4 py-2.5">{{ t('Statut') }}</th>
+                                <th class="px-4 py-2.5 text-right">{{ t('Durée') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                            @for (m of paginatedDone; track m.maintenanceId) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                                <td class="px-4 py-2.5 text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
+                                    {{ m.employeeNom ? (m.employeeNom + ' ' + (m.employeePrenom || '')) : m.employeeId }}
+                                </td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+                                    {{ getMaintenanceDeviceLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {{ getMaintenanceTypeLabel(m) }}
+                                </td>
+                                <td class="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
+                                    m.t1Alerte | date:'dd/MM HH:mm' }}</td>
+                                <td class="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                                    {{ m.description }}</td>
+                                <td class="px-4 py-2.5">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                                        {{ t('Fin') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2.5 text-xs font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap text-right">{{ calcDureeBetween(m.t1Alerte, m.t5Confirmation) }}</td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    {{ t('Aucune maintenance terminée') }}
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (doneMaintenances.length > pageSize) {
+                    <div class="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ donePage * pageSize + 1 }}-{{ (donePage + 1) * pageSize > doneMaintenances.length ? doneMaintenances.length : (donePage + 1) * pageSize }} / {{ doneMaintenances.length }}</span>
+                        <div class="flex gap-1">
+                            <button mat-icon-button [disabled]="donePage === 0" (click)="donePage = donePage - 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [disabled]="donePage >= totalPages(doneMaintenances) - 1" (click)="donePage = donePage + 1" class="!w-8 !h-8">
+                                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Doughnut Chart - Répartition des statuts -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-xl shadow-[0_2px_8px_rgba(15,23,42,0.08)] border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-indigo-500 mr-2"
+                            [svgIcon]="'heroicons_outline:chart-pie'"></mat-icon>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('Répartition des statuts') }}</h3>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center p-6" style="height: 350px;">
+                    <canvas #statusChart></canvas>
+                </div>
+                <div class="px-6 pb-6 pt-1 space-y-2">
+                    @for (item of statusDistribution; track item.label) {
+                    <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <span class="inline-block w-2.5 h-2.5 rounded-full" [style.background-color]="item.color"></span>
+                            <span class="font-medium">{{ item.label }}</span>
+                        </div>
+                        <div class="text-right font-semibold text-gray-900 dark:text-white">
+                            {{ item.count }} point{{ item.count > 1 ? 's' : '' }} ({{ item.percentage }}%)
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

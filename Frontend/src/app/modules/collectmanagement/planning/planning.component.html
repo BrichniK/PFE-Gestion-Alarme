@@ -1,0 +1,58 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50 dark:bg-slate-900" *transloco="let t">
+
+    <!-- Header -->
+    <div
+        class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-4 sm:px-6 bg-white dark:bg-slate-800 border-b">
+        <div class="flex-1 min-w-0">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
+                    t('Fichier') }}</a>
+                <mat-icon class="icon-size-3 mx-1 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
+                <span>{{ t('Planning') }}</span>
+            </div>
+            <!-- Title -->
+            <div class="mt-1 flex items-center">
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+                    {{ t('Plannings') }}
+                </h2>
+                <span
+                    class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                    {{ planningsLength }} {{ t('Total') }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-2 sm:mt-0 sm:ml-4 space-x-3">
+            <!-- Navigation Buttons for Calendar -->
+            <div
+                class="flex items-center space-x-1 bg-white dark:bg-slate-800 rounded-lg border border-gray-300 dark:border-slate-700 shadow-sm">
+                <button class="p-1.5 rounded-l-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                    (click)="dispatchPreviousMonth()">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
+                </button>
+                <span class="px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white min-w-[100px] text-center"
+                    id="calendarMonthYear">
+                    {{ currentMonthYear }}
+                </span>
+                <button class="p-1.5 rounded-r-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                    (click)="dispatchNextMonth()">
+                    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+                </button>
+            </div>
+
+            <button
+                class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+                (click)="dispatchGoToToday()">
+                <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                {{ t('Aujourd\'hui') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Router Outlet for Child Routes -->
+    <div class="flex-auto overflow-hidden">
+        <router-outlet></router-outlet>
+    </div>
+</div>

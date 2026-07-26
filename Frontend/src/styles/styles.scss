@@ -1,0 +1,44 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+dx-license{
+    display: none !important;
+}
+
+:root {
+    --app-font-scale: 1.15;
+    font-size: calc(16px * var(--app-font-scale)) !important;
+}
+
+.dx-theme-fluent-typography,
+.dx-widget {
+    font-size: calc(14px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation .fuse-vertical-navigation-item-wrapper .fuse-vertical-navigation-item {
+    font-size: calc(13px * var(--app-font-scale)) !important;
+    line-height: calc(20px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation .fuse-vertical-navigation-item-subtitle {
+    font-size: calc(11px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation .fuse-vertical-navigation-item-badge-content {
+    font-size: calc(10px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation fuse-vertical-navigation-group-item .fuse-vertical-navigation-item-title {
+    font-size: calc(12px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation.fuse-vertical-navigation-appearance-compact .fuse-vertical-navigation-item-title {
+    font-size: calc(12px * var(--app-font-scale)) !important;
+    line-height: calc(16px * var(--app-font-scale)) !important;
+}
+
+fuse-vertical-navigation.fuse-vertical-navigation-appearance-thin .fuse-vertical-navigation-wrapper .fuse-vertical-navigation-content > fuse-vertical-navigation-aside-item .fuse-vertical-navigation-item-title,
+fuse-vertical-navigation.fuse-vertical-navigation-appearance-thin .fuse-vertical-navigation-wrapper .fuse-vertical-navigation-content > fuse-vertical-navigation-basic-item .fuse-vertical-navigation-item-title {
+    font-size: calc(10px * var(--app-font-scale)) !important;
+}

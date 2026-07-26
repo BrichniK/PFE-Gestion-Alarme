@@ -1,0 +1,78 @@
+.device-table-wrap {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.7) 100%);
+}
+
+.device-table__head {
+    background: #f8fafc;
+}
+
+.dark .device-table__head {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+.device-table__head th {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .device-table__head th {
+    color: #94a3b8;
+    border-bottom-color: #334155;
+}
+
+.device-table__row {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dark .device-table__row {
+    border-bottom-color: rgba(51, 65, 85, 0.6);
+}
+
+.device-avatar {
+    box-shadow: 0 6px 14px rgba(99, 102, 241, 0.2);
+}
+
+.device-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.22rem 0.65rem;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.device-chip--slate {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.device-chip--indigo {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.device-chip--muted {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.device-chip--emerald {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.device-action-btn {
+    border-radius: 10px;
+}
+
+.device-action-btn--edit:hover {
+    background: rgba(99, 102, 241, 0.12);
+}
+
+.device-action-btn--delete:hover {
+    background: rgba(239, 68, 68, 0.12);
+}

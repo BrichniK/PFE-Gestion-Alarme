@@ -1,0 +1,114 @@
+<div class="flex flex-col w-full h-full dark:bg-slate-900/20 bg-slate-300/20 backdrop-blur-md overflow-hidden">
+
+    <!--    Header-->
+    <div class="flex items-center w-full min-h-20 sticky top-0 bg-card px-4">
+        <div class="flex items-center w-2/5 gap-1">
+            <button
+                mat-icon-button
+                [matDialogClose]="'cancelled'"
+                [matTooltip]="'Fermer'"
+            >
+                <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+            </button>
+            <h2
+                class="text-2xl font-bold truncate"
+                [matTooltip]="title"
+            >
+                {{title}}
+            </h2>
+        </div>
+
+        <div class="flex items-center gap-1 w-1/5 justify-center">
+            <button
+                mat-icon-button
+                (click)="zoomOut()"
+                [matTooltip]="'Faire un zoom arrière'"
+            >
+                <mat-icon [svgIcon]="'heroicons_outline:minus'"></mat-icon>
+            </button>
+            <button
+                mat-icon-button
+                (click)="zoomIn()"
+                [matTooltip]="'Faire un zoom avant'"
+            >
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-1 w-2/5 justify-end">
+            <button
+                mat-icon-button
+                (click)="changeOrientation()"
+                [matTooltip]="'Orientation'"
+            >
+                @if (isLandscape) {
+                    <mat-icon [svgIcon]="'mat_outline:crop_landscape'"></mat-icon>
+                } @else {
+                    <mat-icon [svgIcon]="'mat_outline:crop_portrait'"></mat-icon>
+                }
+            </button>
+
+            <button
+                mat-icon-button
+                [matTooltip]="'Imprimer'"
+                (click)="printPdf()"
+            >
+                <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+            </button>
+
+            <button
+                mat-icon-button
+                [matTooltip]="'Envoyez-le par e-mail'"
+            >
+                <mat-icon [svgIcon]="'mat_outline:attach_email'"></mat-icon>
+            </button>
+
+            <button
+                mat-button
+                [matMenuTriggerFor]="exportMenu"
+                [matTooltip]="'Télécharger'"
+            >
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'"></mat-icon>
+                <mat-icon class="ml-2" [svgIcon]="'mat_outline:arrow_drop_down'"></mat-icon>
+            </button>
+            <mat-menu #exportMenu="matMenu">
+                <button mat-menu-item (click)="downloadPdf()">
+                    <mat-icon [svgIcon]="'mat_solid:picture_as_pdf'"></mat-icon>
+                    <span>PDF</span>
+                </button>
+                @if(config.isExcelSupported??false) {
+                    <button mat-menu-item (click)="downloadExcel()">
+                        <mat-icon [svgIcon]="'heroicons_outline:table-cells'"></mat-icon>
+                        <span>Excel</span>
+                    </button>
+                }
+
+                <!--                <button mat-menu-item (click)="downloadDocx()">-->
+                <!--                    <mat-icon [svgIcon]="'heroicons_outline:document-text'"></mat-icon>-->
+                <!--                    <span>Docx</span>-->
+                <!--                </button>-->
+            </mat-menu>
+        </div>
+    </div>
+
+    @if (isDocumentLoading && flashMessage!=='error') {
+        <div class="flex items-center justify-center w-full h-full">
+            <mat-spinner></mat-spinner>
+        </div>
+    }
+
+    @if (flashMessage==='error') {
+        <div class="flex items-center justify-center w-full h-full">
+            <p class="text-warn font-bold">Erreur lors du chargement du fichier!</p>
+        </div>
+    }
+
+    <div
+        class="relative flex flex-col w-full gap-8 p-8 pdf-container overflow-auto"
+        [class.hidden]="isDocumentLoading || flashMessage==='error'"
+        [ngClass]="{'items-start': pdfContainer.scrollWidth>pdfContainer.offsetWidth,
+                    'items-center': pdfContainer.scrollWidth<=pdfContainer.offsetWidth}"
+        #pdfContainer
+    ></div>
+
+</div>

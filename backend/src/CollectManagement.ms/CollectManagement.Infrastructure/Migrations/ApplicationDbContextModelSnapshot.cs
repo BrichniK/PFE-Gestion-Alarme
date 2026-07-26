@@ -668,7 +668,128 @@ namespace CollectManagement.Infrastructure.Migrations
                     b.ToTable("Shift");
                 });
 
-            modelBuilder.Entity("CollectManagement.Domain.Societes.Societe", b =>
+            modelBuilder.Entity("CollectManagement.Domain.Types.Type", b =>
+                {
+                    b.Property<Guid>("TypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("DateInsertion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DureeNominal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InsererPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ModifierPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TypeId");
+
+                    b.ToTable("Type");
+                });
+
+            modelBuilder.Entity("CollectManagement.Domain.Utilisateurs.Entities.RoleUtilisateur", b =>
+                {
+                    b.Property<Guid>("RoleUtilisateurId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DateInsertion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InsererPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LibelleRoleUtilisateur")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ModifierPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RoleUtilisateurId");
+
+                    b.ToTable("RoleUtilisateurs");
+                });
+
+            modelBuilder.Entity("CollectManagement.Domain.Utilisateurs.Utilisateur", b =>
+                {
+                    b.Property<Guid>("UtilisateurId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DateInsertion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("InsererPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ModifierPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NomUtilisateur")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Prenom")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid?>("RoleUtilisateurId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SocieteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UtilisateurId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("NomUtilisateur")
+                        .IsUnique();
+
+                    b.HasIndex("RoleUtilisateurId");
+
+                    b.HasIndex("SocieteId");
+
+                    b.ToTable("Utilisateurs");
+                });
+
+            modelBuilder.Entity("CollectManagementDomain.Societes.Societe", b =>
                 {
                     b.Property<Guid>("SocieteId")
                         .HasColumnType("uniqueidentifier");
@@ -742,128 +863,7 @@ namespace CollectManagement.Infrastructure.Migrations
 
                     b.HasKey("SocieteId");
 
-                    b.ToTable("Societe");
-                });
-
-            modelBuilder.Entity("CollectManagement.Domain.Types.Type", b =>
-                {
-                    b.Property<Guid>("TypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime?>("DateInsertion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateModification")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("DureeNominal")
-                        .HasColumnType("int");
-
-                    b.Property<string>("InsererPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ModifierPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TypeId");
-
-                    b.ToTable("Type");
-                });
-
-            modelBuilder.Entity("CollectManagement.Domain.Utilisateurs.Entities.RoleUtilisateur", b =>
-                {
-                    b.Property<Guid>("RoleUtilisateurId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DateInsertion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateModification")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("InsererPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LibelleRoleUtilisateur")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ModifierPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("RoleUtilisateurId");
-
-                    b.ToTable("RoleUtilisateur");
-                });
-
-            modelBuilder.Entity("CollectManagement.Domain.Utilisateurs.Utilisateur", b =>
-                {
-                    b.Property<Guid>("UtilisateurId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DateInsertion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DateModification")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("InsererPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("ModifierPar")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("NomUtilisateur")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Prenom")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("RoleUtilisateurId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SocieteId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UtilisateurId");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("NomUtilisateur")
-                        .IsUnique();
-
-                    b.HasIndex("RoleUtilisateurId");
-
-                    b.HasIndex("SocieteId");
-
-                    b.ToTable("Utilisateur");
+                    b.ToTable("Societes");
                 });
 
             modelBuilder.Entity("CollectManagement.Domain.Alertes.Alerte", b =>
@@ -1088,7 +1088,7 @@ namespace CollectManagement.Infrastructure.Migrations
                         .HasForeignKey("RoleUtilisateurId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("CollectManagement.Domain.Societes.Societe", "Societe")
+                    b.HasOne("CollectManagementDomain.Societes.Societe", "Societe")
                         .WithMany()
                         .HasForeignKey("SocieteId")
                         .OnDelete(DeleteBehavior.NoAction)
