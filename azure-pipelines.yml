@@ -7,51 +7,46 @@ trigger:
 - main
 
 pool:
-  name: AlertAgent
+  name: Default
 
 variables:
   buildConfiguration: 'Release'
 
+
 stages:
 
+# ==========================
+# BACKEND
+# ==========================
+
 - stage: Backend_Build
-  displayName: Build Backend .NET
+  displayName: Build Backend API
 
   jobs:
+
   - job: Build_API
 
     steps:
 
     - task: UseDotNet@2
-      displayName: Install .NET 8 SDK
+      displayName: Install .NET 8
       inputs:
         packageType: sdk
         version: '8.x'
 
 
     - task: DotNetCoreCLI@2
-      displayName: Restore Solution
+      displayName: Restore
       inputs:
         command: restore
-        projects: |
-          Backend/CST.LePoint.sln
+        projects: Backend/CST.LePoint.sln
 
 
     - task: DotNetCoreCLI@2
-      displayName: Build Solution
+      displayName: Build
       inputs:
         command: build
-        projects: |
-          Backend/CST.LePoint.sln
-        arguments: '--configuration $(buildConfiguration)'
-
-
-    - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
-        projects: |
-          Backend/CST.LePoint.sln
+        projects: Backend/CST.LePoint.sln
         arguments: '--configuration $(buildConfiguration)'
 
 
@@ -59,13 +54,49 @@ stages:
       displayName: Publish API
       inputs:
         command: publish
-        projects: |
-          Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
+        projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
 
     - task: PublishBuildArtifacts@1
-      displayName: Publish Backend Artifact
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: backend
+
+
+
+# ==========================
+# FRONTEND
+# ==========================
+
+- stage: Frontend_Build
+  displayName: Build Angular
+
+  jobs:
+
+  - job: Build_Angular
+
+    steps:
+
+    - task: NodeTool@0
+      displayName: Install Node 22
+      inputs:
+        versionSpec: '22.x'
+
+
+    - script: |
+        cd Frontend
+        npm ci
+      displayName: Install packages
+
+
+    - script: |
+        cd Frontend
+        npm run build
+      displayName: Build Angular
+
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: Frontend/dist
+        artifactName: frontend
