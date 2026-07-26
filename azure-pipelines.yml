@@ -12,12 +12,7 @@ pool:
 variables:
   buildConfiguration: 'Release'
 
-
 stages:
-
-# ==========================
-# BACKEND .NET
-# ==========================
 
 - stage: Backend_Build
   displayName: Build Backend .NET
@@ -35,19 +30,19 @@ stages:
 
 
     - task: DotNetCoreCLI@2
-      displayName: Restore NuGet packages
+      displayName: Restore Solution
       inputs:
         command: restore
         projects: |
-          Backend/**/*.csproj
+          Backend/CST.LePoint.sln
 
 
     - task: DotNetCoreCLI@2
-      displayName: Build Backend
+      displayName: Build Solution
       inputs:
         command: build
         projects: |
-          Backend/**/*.csproj
+          Backend/CST.LePoint.sln
         arguments: '--configuration $(buildConfiguration)'
 
 
@@ -56,7 +51,7 @@ stages:
       inputs:
         command: test
         projects: |
-          backend/**/*.csproj
+          Backend/CST.LePoint.sln
         arguments: '--configuration $(buildConfiguration)'
 
 
@@ -65,7 +60,7 @@ stages:
       inputs:
         command: publish
         projects: |
-          backend/CollectManagement.WebAPI/*.csproj
+          Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
 
@@ -74,41 +69,3 @@ stages:
       inputs:
         pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: backend
-
-
-# ==========================
-# FRONTEND ANGULAR
-# ==========================
-
-- stage: Frontend_Build
-  displayName: Build Angular
-
-  jobs:
-
-  - job: Build_Angular
-
-    steps:
-
-    - task: NodeTool@0
-      displayName: Install Node.js
-      inputs:
-        versionSpec: '22.x'
-
-
-    - script: |
-        cd Frontend
-        npm install
-      displayName: Install Angular dependencies
-
-
-    - script: |
-        cd Frontend
-        npm run build
-      displayName: Build Angular
-
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Frontend Artifact
-      inputs:
-        pathToPublish: 'Frontend/dist'
-        artifactName: frontend
