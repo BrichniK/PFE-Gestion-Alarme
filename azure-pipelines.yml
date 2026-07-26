@@ -7,28 +7,108 @@ trigger:
 - main
 
 pool:
-  vmImage: 'windows-latest'
+  name: Default
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-steps:
-- task: NuGetToolInstaller@1
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+stages:
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+# ==========================
+# BACKEND .NET
+# ==========================
 
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+- stage: Backend_Build
+  displayName: Build Backend .NET
+
+  jobs:
+  - job: Build_API
+
+    steps:
+
+    - task: UseDotNet@2
+      displayName: Install .NET 8 SDK
+      inputs:
+        packageType: sdk
+        version: '8.x'
+
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore NuGet packages
+      inputs:
+        command: restore
+        projects: |
+          Backend/**/*.csproj
+
+
+    - task: DotNetCoreCLI@2
+      displayName: Build Backend
+      inputs:
+        command: build
+        projects: |
+          Backend/**/*.csproj
+        arguments: '--configuration $(buildConfiguration)'
+
+
+    - task: DotNetCoreCLI@2
+      displayName: Run Tests
+      inputs:
+        command: test
+        projects: |
+          backend/**/*.csproj
+        arguments: '--configuration $(buildConfiguration)'
+
+
+    - task: DotNetCoreCLI@2
+      displayName: Publish API
+      inputs:
+        command: publish
+        projects: |
+          backend/CollectManagement.WebAPI/*.csproj
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Backend Artifact
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: backend
+
+
+# ==========================
+# FRONTEND ANGULAR
+# ==========================
+
+- stage: Frontend_Build
+  displayName: Build Angular
+
+  jobs:
+
+  - job: Build_Angular
+
+    steps:
+
+    - task: NodeTool@0
+      displayName: Install Node.js
+      inputs:
+        versionSpec: '22.x'
+
+
+    - script: |
+        cd Frontend
+        npm install
+      displayName: Install Angular dependencies
+
+
+    - script: |
+        cd Frontend
+        npm run build
+      displayName: Build Angular
+
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Frontend Artifact
+      inputs:
+        pathToPublish: 'Frontend/dist'
+        artifactName: frontend
