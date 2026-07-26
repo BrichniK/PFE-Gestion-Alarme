@@ -1,0 +1,33 @@
+# Node.js with Angular
+# Build a Node.js project that uses Angular.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+pool:
+  name: AlertAgent
+
+steps:
+
+- task: NodeTool@0
+  displayName: 'Use Node.js 22'
+  inputs:
+    versionSpec: '22.x'
+
+- script: |
+    cd Frontend
+    npm ci
+  displayName: 'Install dependencies'
+
+- script: |
+    cd Frontend
+    npm run build
+  displayName: 'Build Angular'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Frontend Artifact'
+  inputs:
+    pathToPublish: 'Frontend/dist'
+    artifactName: 'frontend'
