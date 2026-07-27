@@ -59,7 +59,7 @@ stages:
         scannerMode: 'dotnet'
         projectKey: 'khalilbrichni'
         extraProperties: |
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**,../Frontend/**,**/*.ts,**/*.html,**/*.css
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
 
