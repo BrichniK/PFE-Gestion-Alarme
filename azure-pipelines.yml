@@ -6,8 +6,10 @@
 trigger:
 - main
 
+
 pool:
   name: AlertAgent
+
 
 variables:
   buildConfiguration: 'Release'
@@ -15,24 +17,35 @@ variables:
 
 stages:
 
-# ==========================
+
+# =====================================================
 # BACKEND
-# ==========================
+# =====================================================
 
 - stage: Backend_Build
   displayName: Build Backend API
+
 
   jobs:
 
   - job: Build_API
 
+    displayName: Build .NET Backend
+
+
     steps:
 
+
+    # ==========================
+    # INSTALL .NET
+    # ==========================
+
     - task: UseDotNet@2
-      displayName: Install .NET 8
+      displayName: Install .NET 8 SDK
       inputs:
         packageType: sdk
         version: '8.x'
+
 
 
     # ==========================
@@ -40,7 +53,7 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
-      displayName: Restore
+      displayName: Restore Backend
       inputs:
         command: restore
         projects: Backend/CST.LePoint.sln
@@ -53,14 +66,25 @@ stages:
 
     - task: SonarCloudPrepare@3
       displayName: Prepare SonarCloud
+
       inputs:
+
         SonarCloud: 'SonarCloudConnection'
+
         organization: 'khalilbrichni'
+
         scannerMode: 'dotnet'
+
         projectKey: 'khalilbrichni'
+
+
         extraProperties: |
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**,../Frontend/**,**/*.ts,**/*.html,**/*.css
+
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**,Frontend/**,**/*.ts,**/*.html,**/*.css
+
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
+
+          sonar.cs.cobertura.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml
 
 
 
@@ -69,27 +93,78 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
-      displayName: Build
+      displayName: Build Backend
+
       inputs:
+
         command: build
+
         projects: Backend/CST.LePoint.sln
+
         arguments: '--configuration $(buildConfiguration)'
 
 
 
     # ==========================
-    # TEST + COVERAGE
+    # UNIT TESTS + COVERAGE
     # ==========================
 
     - task: DotNetCoreCLI@2
       displayName: Run Unit Tests + Coverage
+
       inputs:
+
         command: test
+
         projects: Backend/tests/**/*.csproj
+
         arguments: >
+
           --configuration $(buildConfiguration)
+
+          --logger trx
+
+          --results-directory $(Agent.TempDirectory)/TestResults
+
           --collect:"XPlat Code Coverage"
+
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+
+
+    # ==========================
+    # PUBLISH TEST RESULTS
+    # ==========================
+
+    - task: PublishTestResults@2
+
+      displayName: Publish Unit Test Results
+
+      inputs:
+
+        testResultsFormat: VSTest
+
+        testResultsFiles: '**/*.trx'
+
+        searchFolder: '$(Agent.TempDirectory)/TestResults'
+
+        failTaskOnFailedTests: true
+
+
+
+    # ==========================
+    # PUBLISH COVERAGE
+    # ==========================
+
+    - task: PublishCodeCoverageResults@2
+
+      displayName: Publish Code Coverage
+
+      inputs:
+
+        codeCoverageTool: Cobertura
+
+        summaryFileLocation: '**/coverage.cobertura.xml'
 
 
 
@@ -98,13 +173,17 @@ stages:
     # ==========================
 
     - task: SonarCloudAnalyze@3
+
       displayName: Analyze with SonarCloud
 
 
 
     - task: SonarCloudPublish@3
+
       displayName: Publish SonarCloud Result
+
       inputs:
+
         pollingTimeoutSec: '300'
 
 
@@ -114,55 +193,113 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
+
       displayName: Publish API
+
       inputs:
+
         command: publish
+
         projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
+
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
 
 
+    # ==========================
+    # ARTIFACT BACKEND
+    # ==========================
+
     - task: PublishBuildArtifacts@1
+
       displayName: Publish Backend Artifact
+
       inputs:
+
         pathToPublish: $(Build.ArtifactStagingDirectory)
+
         artifactName: backend
 
 
 
-# ==========================
-# FRONTEND
-# ==========================
+
+
+# =====================================================
+# FRONTEND ANGULAR
+# =====================================================
+
 
 - stage: Frontend_Build
-  displayName: Build Angular
+
+  displayName: Build Angular Frontend
+
+
 
   jobs:
 
+
   - job: Build_Angular
+
+    displayName: Build Angular Application
+
+
 
     steps:
 
+
+
+    # ==========================
+    # NODE
+    # ==========================
+
     - task: NodeTool@0
+
       displayName: Install Node 22
+
       inputs:
+
         versionSpec: '22.x'
 
 
+
+    # ==========================
+    # INSTALL PACKAGES
+    # ==========================
+
     - script: |
+
         cd Frontend
+
         npm ci
-      displayName: Install packages
 
+      displayName: Install Angular Dependencies
+
+
+
+    # ==========================
+    # BUILD ANGULAR
+    # ==========================
 
     - script: |
+
         cd Frontend
+
         npm run build
+
       displayName: Build Angular
 
 
+
+    # ==========================
+    # ARTIFACT FRONTEND
+    # ==========================
+
     - task: PublishBuildArtifacts@1
+
       displayName: Publish Frontend Artifact
+
       inputs:
+
         pathToPublish: Frontend/dist
+
         artifactName: frontend
