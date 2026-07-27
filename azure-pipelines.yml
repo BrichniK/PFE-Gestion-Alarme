@@ -40,6 +40,7 @@ stages:
 
     - task: UseDotNet@2
       displayName: Install .NET 8 SDK
+
       inputs:
         packageType: sdk
         version: '8.x'
@@ -51,7 +52,9 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
+
       displayName: Restore Backend
+
       inputs:
         command: restore
         projects: Backend/CST.LePoint.sln
@@ -63,6 +66,7 @@ stages:
     # ==========================
 
     - task: SonarCloudPrepare@3
+
       displayName: Prepare SonarCloud
 
       inputs:
@@ -75,13 +79,14 @@ stages:
 
         projectKey: 'khalilbrichni'
 
+
         extraProperties: |
 
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/Frontend/**
 
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
-          sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
+          sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
 
 
 
@@ -90,7 +95,9 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
+
       displayName: Build Backend
+
       inputs:
 
         command: build
@@ -106,7 +113,9 @@ stages:
     # ==========================
 
     - task: DotNetCoreCLI@2
+
       displayName: Run Unit Tests + Coverage
+
 
       inputs:
 
@@ -114,17 +123,32 @@ stages:
 
         projects: Backend/tests/**/*.csproj
 
+
         arguments: >
 
           --configuration $(buildConfiguration)
 
           --logger trx
 
-          --results-directory $(Agent.TempDirectory)/TestResults
+          --results-directory $(Build.SourcesDirectory)/TestResults
 
           --collect:"XPlat Code Coverage"
 
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+
+
+    # ==========================
+    # DEBUG COVERAGE FILE
+    # ==========================
+
+    - powershell: |
+
+        Write-Host "Searching coverage files..."
+
+        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse
+
+      displayName: Check Coverage Files
 
 
 
@@ -136,13 +160,14 @@ stages:
 
       displayName: Publish Unit Test Results
 
+
       inputs:
 
         testResultsFormat: VSTest
 
         testResultsFiles: '**/*.trx'
 
-        searchFolder: '$(Agent.TempDirectory)/TestResults'
+        searchFolder: '$(Build.SourcesDirectory)/TestResults'
 
         failTaskOnFailedTests: true
 
@@ -156,11 +181,12 @@ stages:
 
       displayName: Publish Code Coverage
 
+
       inputs:
 
         codeCoverageTool: Cobertura
 
-        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml'
+        summaryFileLocation: '$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml'
 
 
 
@@ -192,6 +218,7 @@ stages:
 
       displayName: Publish API
 
+
       inputs:
 
         command: publish
@@ -209,6 +236,7 @@ stages:
     - task: PublishBuildArtifacts@1
 
       displayName: Publish Backend Artifact
+
 
       inputs:
 
@@ -238,9 +266,7 @@ stages:
     displayName: Build Angular Application
 
 
-
     steps:
-
 
 
     # ==========================
@@ -292,6 +318,7 @@ stages:
     - task: PublishBuildArtifacts@1
 
       displayName: Publish Frontend Artifact
+
 
       inputs:
 
