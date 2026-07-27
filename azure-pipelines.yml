@@ -57,7 +57,7 @@ stages:
         SonarCloud: 'SonarCloudConnection'
         organization: 'khalilBRICHNI'
         scannerMode: 'MSBuild'
-        projectKey: 'REMOVED_SECRET'
+        projectKey: 'khalilbrichni'
         extraProperties: |
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
