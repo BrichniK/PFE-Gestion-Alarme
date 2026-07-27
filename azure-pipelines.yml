@@ -1,7 +1,5 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+# ASP.NET Core (.NET 8)
+# Build + Unit Tests + Coverage + SonarCloud + Artifacts
 
 trigger:
 - main
@@ -66,7 +64,6 @@ stages:
 
     - task: SonarCloudPrepare@3
       displayName: Prepare SonarCloud
-
       inputs:
 
         SonarCloud: 'SonarCloudConnection'
@@ -77,14 +74,13 @@ stages:
 
         projectKey: 'khalilbrichni'
 
-
         extraProperties: |
 
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**,Frontend/**,**/*.ts,**/*.html,**/*.css
 
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
-          sonar.cs.cobertura.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml
+          sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
 
 
@@ -94,7 +90,6 @@ stages:
 
     - task: DotNetCoreCLI@2
       displayName: Build Backend
-
       inputs:
 
         command: build
@@ -128,7 +123,7 @@ stages:
 
           --collect:"XPlat Code Coverage"
 
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
 
@@ -164,7 +159,7 @@ stages:
 
         codeCoverageTool: Cobertura
 
-        summaryFileLocation: '**/coverage.cobertura.xml'
+        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml'
 
 
 
@@ -232,7 +227,6 @@ stages:
 - stage: Frontend_Build
 
   displayName: Build Angular Frontend
-
 
 
   jobs:
