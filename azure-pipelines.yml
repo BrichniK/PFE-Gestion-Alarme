@@ -64,6 +64,7 @@ stages:
 
     - task: SonarCloudPrepare@3
       displayName: Prepare SonarCloud
+
       inputs:
 
         SonarCloud: 'SonarCloudConnection'
@@ -76,9 +77,15 @@ stages:
 
         extraProperties: |
 
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**,Frontend/**,**/*.ts,**/*.html,**/*.css
+          sonar.sources=Backend/src
 
-          sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
+          sonar.tests=Backend/tests
+
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/*Tests.cs
+
+          sonar.test.exclusions=**/bin/**,**/obj/**
+
+          sonar.coverage.exclusions=**/*Tests.cs
 
           sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
