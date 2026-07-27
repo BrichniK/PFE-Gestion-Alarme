@@ -86,7 +86,7 @@ stages:
 
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
-          sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
+          sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
 
 
@@ -97,6 +97,7 @@ stages:
     - task: DotNetCoreCLI@2
 
       displayName: Build Backend
+
 
       inputs:
 
@@ -130,7 +131,7 @@ stages:
 
           --logger trx
 
-          --results-directory $(Build.SourcesDirectory)/TestResults
+          --results-directory $(Agent.TempDirectory)/TestResults
 
           --collect:"XPlat Code Coverage"
 
@@ -139,14 +140,14 @@ stages:
 
 
     # ==========================
-    # DEBUG COVERAGE FILE
+    # CHECK COVERAGE FILE
     # ==========================
 
     - powershell: |
 
         Write-Host "Searching coverage files..."
 
-        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse
+        Get-ChildItem "$(Agent.TempDirectory)/TestResults" -Recurse
 
       displayName: Check Coverage Files
 
@@ -167,7 +168,7 @@ stages:
 
         testResultsFiles: '**/*.trx'
 
-        searchFolder: '$(Build.SourcesDirectory)/TestResults'
+        searchFolder: '$(Agent.TempDirectory)/TestResults'
 
         failTaskOnFailedTests: true
 
@@ -186,7 +187,7 @@ stages:
 
         codeCoverageTool: Cobertura
 
-        summaryFileLocation: '$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml'
+        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml'
 
 
 
@@ -203,6 +204,7 @@ stages:
     - task: SonarCloudPublish@3
 
       displayName: Publish SonarCloud Result
+
 
       inputs:
 
@@ -252,7 +254,6 @@ stages:
 # FRONTEND ANGULAR
 # =====================================================
 
-
 - stage: Frontend_Build
 
   displayName: Build Angular Frontend
@@ -269,6 +270,7 @@ stages:
     steps:
 
 
+
     # ==========================
     # NODE
     # ==========================
@@ -276,6 +278,7 @@ stages:
     - task: NodeTool@0
 
       displayName: Install Node 22
+
 
       inputs:
 
@@ -293,6 +296,7 @@ stages:
 
         npm ci
 
+
       displayName: Install Angular Dependencies
 
 
@@ -307,6 +311,7 @@ stages:
 
         npm run build
 
+
       displayName: Build Angular
 
 
@@ -316,6 +321,7 @@ stages:
     # ==========================
 
     - task: PublishBuildArtifacts@1
+
 
       displayName: Publish Frontend Artifact
 
