@@ -35,12 +35,38 @@ stages:
         version: '8.x'
 
 
+    # ==========================
+    # RESTORE
+    # ==========================
+
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: restore
         projects: Backend/CST.LePoint.sln
 
+
+
+    # ==========================
+    # SONARCLOUD PREPARE
+    # ==========================
+
+    - task: SonarCloudPrepare@2
+      displayName: Prepare SonarCloud
+      inputs:
+        SonarCloud: 'SonarCloudConnection'
+        organization: 'TON_ORGANIZATION'
+        scannerMode: 'MSBuild'
+        projectKey: 'TON_PROJECT_KEY'
+        extraProperties: |
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/node_modules/**,**/dist/**
+          sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
+
+
+
+    # ==========================
+    # BUILD
+    # ==========================
 
     - task: DotNetCoreCLI@2
       displayName: Build
@@ -50,6 +76,43 @@ stages:
         arguments: '--configuration $(buildConfiguration)'
 
 
+
+    # ==========================
+    # TEST + COVERAGE
+    # ==========================
+
+    - task: DotNetCoreCLI@2
+      displayName: Run Unit Tests + Coverage
+      inputs:
+        command: test
+        projects: Backend/tests/**/*.csproj
+        arguments: >
+          --configuration $(buildConfiguration)
+          --collect:"XPlat Code Coverage"
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+
+
+    # ==========================
+    # SONARCLOUD ANALYSIS
+    # ==========================
+
+    - task: SonarCloudAnalyze@2
+      displayName: Analyze with SonarCloud
+
+
+
+    - task: SonarCloudPublish@2
+      displayName: Publish SonarCloud Result
+      inputs:
+        pollingTimeoutSec: '300'
+
+
+
+    # ==========================
+    # PUBLISH API
+    # ==========================
+
     - task: DotNetCoreCLI@2
       displayName: Publish API
       inputs:
@@ -58,7 +121,9 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
 
+
     - task: PublishBuildArtifacts@1
+      displayName: Publish Backend Artifact
       inputs:
         pathToPublish: $(Build.ArtifactStagingDirectory)
         artifactName: backend
@@ -97,6 +162,7 @@ stages:
 
 
     - task: PublishBuildArtifacts@1
+      displayName: Publish Frontend Artifact
       inputs:
         pathToPublish: Frontend/dist
         artifactName: frontend
