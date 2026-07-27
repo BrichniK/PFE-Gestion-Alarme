@@ -77,15 +77,9 @@ stages:
 
         extraProperties: |
 
-          sonar.sources=Backend/src
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/Frontend/**
 
-          sonar.tests=Backend/tests
-
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/*Tests.cs
-
-          sonar.test.exclusions=**/bin/**,**/obj/**
-
-          sonar.coverage.exclusions=**/*Tests.cs
+          sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
           sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
