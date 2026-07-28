@@ -141,19 +141,34 @@ stages:
 
 
     # ==========================
-    # CHECK TEST PROJECT
+    # DEBUG PATH PROJECTS
     # ==========================
 
 
     - powershell: |
 
 
-        Write-Host "Checking test project path..."
+        Write-Host "Current directory:"
+        Get-Location
 
-        Test-Path "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj"
+
+        Write-Host ""
+
+        Write-Host "Repository content:"
+
+        Get-ChildItem "$(Build.SourcesDirectory)"
 
 
-      displayName: Check Test Project
+
+        Write-Host ""
+
+        Write-Host "Searching csproj files..."
+
+        Get-ChildItem "$(Build.SourcesDirectory)" -Recurse -Filter "*.csproj" |
+        Select-Object FullName
+
+
+      displayName: Find Project Files
 
 
 
@@ -192,10 +207,10 @@ stages:
         Write-Host "Searching coverage files..."
 
 
-        Get-ChildItem "$(Agent.BuildDirectory)" -Recurse `
-          -Include coverage.opencover.xml,*.trx `
-          -ErrorAction SilentlyContinue |
-          Select-Object FullName
+        Get-ChildItem "$(Agent.TempDirectory)" -Recurse `
+        -Include coverage.opencover.xml,*.trx `
+        -ErrorAction SilentlyContinue |
+        Select-Object FullName
 
 
       displayName: Check Coverage Files
@@ -205,7 +220,7 @@ stages:
 
 
     # ==========================
-    # PUBLISH TEST RESULTS
+    # TEST RESULTS
     # ==========================
 
 
@@ -234,7 +249,7 @@ stages:
 
 
     # ==========================
-    # PUBLISH COVERAGE
+    # COVERAGE
     # ==========================
 
 
@@ -312,7 +327,7 @@ stages:
 
 
     # ==========================
-    # BACKEND ARTIFACT
+    # ARTIFACT BACKEND
     # ==========================
 
 
@@ -382,7 +397,7 @@ stages:
 
 
     # ==========================
-    # INSTALL DEPENDENCIES
+    # INSTALL
     # ==========================
 
 
@@ -401,7 +416,7 @@ stages:
 
 
     # ==========================
-    # BUILD ANGULAR
+    # BUILD
     # ==========================
 
 
@@ -420,7 +435,7 @@ stages:
 
 
     # ==========================
-    # FRONTEND ARTIFACT
+    # ARTIFACT FRONTEND
     # ==========================
 
 
