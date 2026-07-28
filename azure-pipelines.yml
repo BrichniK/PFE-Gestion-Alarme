@@ -11,7 +11,6 @@ pool:
 
 
 variables:
-
   buildConfiguration: 'Release'
 
 
@@ -30,14 +29,12 @@ stages:
   displayName: Build Backend API
 
 
-
   jobs:
 
 
   - job: Build_API
 
     displayName: Build .NET Backend
-
 
 
     steps:
@@ -52,7 +49,6 @@ stages:
     - task: UseDotNet@2
 
       displayName: Install .NET 8 SDK
-
 
       inputs:
 
@@ -71,9 +67,7 @@ stages:
 
     - task: DotNetCoreCLI@2
 
-
       displayName: Restore Backend
-
 
       inputs:
 
@@ -91,7 +85,6 @@ stages:
 
 
     - task: SonarCloudPrepare@3
-
 
       displayName: Prepare SonarCloud
 
@@ -111,15 +104,11 @@ stages:
         projectKey: 'khalilbrichni'
 
 
-
         extraProperties: |
-
 
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/Frontend/**
 
-
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
-
 
           sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
@@ -161,18 +150,12 @@ stages:
     - powershell: |
 
 
-        dotnet test Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj `
-
+        dotnet test "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
           --configuration $(buildConfiguration) `
-
-          --logger trx `
-
+          --logger "trx" `
           --results-directory "$(Agent.TempDirectory)\TestResults" `
-
           --collect:"XPlat Code Coverage" `
-
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
 
 
       displayName: Run Unit Tests + Coverage
@@ -193,13 +176,9 @@ stages:
 
 
         Get-ChildItem "$(Agent.BuildDirectory)" -Recurse `
-
           -Include coverage.opencover.xml,*.trx `
-
           -ErrorAction SilentlyContinue |
-
           Select-Object FullName
-
 
 
       displayName: Check Coverage Files
@@ -209,7 +188,7 @@ stages:
 
 
     # ==========================
-    # TEST RESULTS
+    # PUBLISH TEST RESULTS
     # ==========================
 
 
@@ -238,7 +217,7 @@ stages:
 
 
     # ==========================
-    # COVERAGE
+    # PUBLISH COVERAGE
     # ==========================
 
 
@@ -339,6 +318,7 @@ stages:
 
 
 
+
 # =====================================================
 # FRONTEND ANGULAR
 # =====================================================
@@ -350,16 +330,13 @@ stages:
 
 
 
-
   jobs:
-
 
 
   - job: Build_Angular
 
 
     displayName: Build Angular Application
-
 
 
 
@@ -389,7 +366,7 @@ stages:
 
 
     # ==========================
-    # NPM INSTALL
+    # INSTALL PACKAGES
     # ==========================
 
 
@@ -408,7 +385,7 @@ stages:
 
 
     # ==========================
-    # ANGULAR BUILD
+    # BUILD ANGULAR
     # ==========================
 
 
