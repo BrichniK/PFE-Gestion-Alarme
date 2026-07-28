@@ -1,0 +1,16 @@
+- powershell: |
+
+    Write-Host "Current directory:"
+    Get-Location
+
+    Write-Host ""
+    Write-Host "Repository content:"
+    Get-ChildItem "$(Build.SourcesDirectory)"
+
+    Write-Host ""
+    Write-Host "Searching csproj files..."
+
+    Get-ChildItem "$(Build.SourcesDirectory)" -Recurse -Filter "*.csproj" |
+    Select-Object FullName
+
+  displayName: Find Project Files
