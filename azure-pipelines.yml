@@ -42,7 +42,7 @@ stages:
 
 
     # ==========================
-    # INSTALL .NET
+    # INSTALL .NET 8
     # ==========================
 
 
@@ -106,9 +106,7 @@ stages:
 
         extraProperties: |
 
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/Frontend/**
-
-          sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/tests/**
 
           sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
 
@@ -117,7 +115,7 @@ stages:
 
 
     # ==========================
-    # BUILD
+    # BUILD BACKEND
     # ==========================
 
 
@@ -143,6 +141,25 @@ stages:
 
 
     # ==========================
+    # CHECK TEST PROJECT
+    # ==========================
+
+
+    - powershell: |
+
+
+        Write-Host "Checking test project path..."
+
+        Test-Path "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj"
+
+
+      displayName: Check Test Project
+
+
+
+
+
+    # ==========================
     # UNIT TEST + COVERAGE
     # ==========================
 
@@ -150,7 +167,7 @@ stages:
     - powershell: |
 
 
-        dotnet test "tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
+        dotnet test "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
           --configuration $(buildConfiguration) `
           --logger "trx" `
           --results-directory "$(Agent.TempDirectory)\TestResults" `
@@ -207,7 +224,7 @@ stages:
         testResultsFiles: '**/*.trx'
 
 
-        searchFolder: '$(Agent.TempDirectory)/TestResults'
+        searchFolder: '$(Agent.TempDirectory)\TestResults'
 
 
         failTaskOnFailedTests: true
@@ -233,14 +250,14 @@ stages:
         codeCoverageTool: Cobertura
 
 
-        summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml'
+        summaryFileLocation: '$(Agent.TempDirectory)\TestResults\**\coverage.opencover.xml'
 
 
 
 
 
     # ==========================
-    # SONARCLOUD ANALYSIS
+    # SONARCLOUD ANALYZE
     # ==========================
 
 
@@ -344,7 +361,6 @@ stages:
 
 
 
-
     # ==========================
     # NODE
     # ==========================
@@ -366,7 +382,7 @@ stages:
 
 
     # ==========================
-    # INSTALL PACKAGES
+    # INSTALL DEPENDENCIES
     # ==========================
 
 
