@@ -1,5 +1,8 @@
-﻿using CollectManagement.Domain.Utilisateurs;
+﻿using CollectManagement.Domain.Alertes;
+using CollectManagement.Domain.Devices;
+using CollectManagement.Domain.Utilisateurs;
 using CollectManagement.Domain.Utilisateurs.Entities;
+using CollectManagement.Infrastructure.Persistence.Configurations.AlerteConfigurations;
 using CollectManagementDomain.Societes;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,13 +21,18 @@ public class ApplicationDbContext : DbContext
     public DbSet<RoleUtilisateur> RoleUtilisateurs { get; set; }
 
     public DbSet<Societe> Societes { get; set; }
+    
+    
+    public DbSet<Alerte> Alertes { get; set; }
 
+    public DbSet<Device> Devices { get; set; }
 
+    public DbSet<Type> Types { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Charge toutes les configurations EF Core
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfiguration(
+            new AlerteConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }
