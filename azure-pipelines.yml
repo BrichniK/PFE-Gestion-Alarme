@@ -1,6 +1,7 @@
 # ASP.NET Core (.NET 8)
 # Build + Unit Tests + Coverage + SonarCloud + Artifacts
 
+
 trigger:
 - main
 
@@ -10,40 +11,56 @@ pool:
 
 
 variables:
+
   buildConfiguration: 'Release'
 
 
+
 stages:
+
 
 
 # =====================================================
 # BACKEND
 # =====================================================
 
+
 - stage: Backend_Build
+
   displayName: Build Backend API
 
 
+
   jobs:
+
 
   - job: Build_API
 
     displayName: Build .NET Backend
 
 
+
     steps:
+
 
 
     # ==========================
     # INSTALL .NET
     # ==========================
 
+
     - task: UseDotNet@2
+
       displayName: Install .NET 8 SDK
 
+
       inputs:
+
         packageType: sdk
+
         version: '8.x'
+
+
 
 
 
@@ -51,13 +68,20 @@ stages:
     # RESTORE
     # ==========================
 
+
     - task: DotNetCoreCLI@2
+
 
       displayName: Restore Backend
 
+
       inputs:
+
         command: restore
+
         projects: Backend/CST.LePoint.sln
+
+
 
 
 
@@ -65,28 +89,41 @@ stages:
     # SONARCLOUD PREPARE
     # ==========================
 
+
     - task: SonarCloudPrepare@3
+
 
       displayName: Prepare SonarCloud
 
+
       inputs:
+
 
         SonarCloud: 'SonarCloudConnection'
 
+
         organization: 'khalilbrichni'
 
+
         scannerMode: 'dotnet'
+
 
         projectKey: 'khalilbrichni'
 
 
+
         extraProperties: |
+
 
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/Frontend/**
 
+
           sonar.coverage.exclusions=**/*Tests.cs,**/tests/**
 
+
           sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
+
+
 
 
 
@@ -94,48 +131,53 @@ stages:
     # BUILD
     # ==========================
 
+
     - task: DotNetCoreCLI@2
+
 
       displayName: Build Backend
 
 
       inputs:
 
+
         command: build
 
+
         projects: Backend/CST.LePoint.sln
+
 
         arguments: '--configuration $(buildConfiguration)'
 
 
 
+
+
     # ==========================
-    # UNIT TESTS + COVERAGE
+    # UNIT TEST + COVERAGE
     # ==========================
 
-    - task: DotNetCoreCLI@2
+
+    - powershell: |
+
+
+        dotnet test Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj `
+
+          --configuration $(buildConfiguration) `
+
+          --logger trx `
+
+          --results-directory "$(Agent.TempDirectory)\TestResults" `
+
+          --collect:"XPlat Code Coverage" `
+
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+
 
       displayName: Run Unit Tests + Coverage
 
 
-      inputs:
-
-        command: test
-
-        projects: Backend/tests/**/*.csproj
-
-
-        arguments: >
-
-          --configuration $(buildConfiguration)
-
-          --logger trx
-
-          --results-directory $(Agent.TempDirectory)/TestResults
-
-          --collect:"XPlat Code Coverage"
-
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
 
@@ -143,51 +185,78 @@ stages:
     # CHECK COVERAGE FILE
     # ==========================
 
+
     - powershell: |
+
 
         Write-Host "Searching coverage files..."
 
-        Get-ChildItem "$(Agent.TempDirectory)/TestResults" -Recurse
+
+        Get-ChildItem "$(Agent.BuildDirectory)" -Recurse `
+
+          -Include coverage.opencover.xml,*.trx `
+
+          -ErrorAction SilentlyContinue |
+
+          Select-Object FullName
+
+
 
       displayName: Check Coverage Files
 
 
 
+
+
     # ==========================
-    # PUBLISH TEST RESULTS
+    # TEST RESULTS
     # ==========================
 
+
     - task: PublishTestResults@2
+
 
       displayName: Publish Unit Test Results
 
 
       inputs:
 
+
         testResultsFormat: VSTest
+
 
         testResultsFiles: '**/*.trx'
 
+
         searchFolder: '$(Agent.TempDirectory)/TestResults'
+
 
         failTaskOnFailedTests: true
 
 
 
+
+
     # ==========================
-    # PUBLISH COVERAGE
+    # COVERAGE
     # ==========================
 
+
     - task: PublishCodeCoverageResults@2
+
 
       displayName: Publish Code Coverage
 
 
       inputs:
 
+
         codeCoverageTool: Cobertura
 
+
         summaryFileLocation: '$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml'
+
+
 
 
 
@@ -195,20 +264,28 @@ stages:
     # SONARCLOUD ANALYSIS
     # ==========================
 
+
     - task: SonarCloudAnalyze@3
+
 
       displayName: Analyze with SonarCloud
 
 
 
+
+
     - task: SonarCloudPublish@3
+
 
       displayName: Publish SonarCloud Result
 
 
       inputs:
 
+
         pollingTimeoutSec: '300'
+
+
 
 
 
@@ -216,35 +293,47 @@ stages:
     # PUBLISH API
     # ==========================
 
+
     - task: DotNetCoreCLI@2
+
 
       displayName: Publish API
 
 
       inputs:
 
+
         command: publish
 
+
         projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
+
 
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
 
 
 
+
+
     # ==========================
-    # ARTIFACT BACKEND
+    # BACKEND ARTIFACT
     # ==========================
 
+
     - task: PublishBuildArtifacts@1
+
 
       displayName: Publish Backend Artifact
 
 
       inputs:
 
+
         pathToPublish: $(Build.ArtifactStagingDirectory)
 
+
         artifactName: backend
+
 
 
 
@@ -254,20 +343,28 @@ stages:
 # FRONTEND ANGULAR
 # =====================================================
 
+
 - stage: Frontend_Build
 
   displayName: Build Angular Frontend
 
 
+
+
   jobs:
+
 
 
   - job: Build_Angular
 
+
     displayName: Build Angular Application
 
 
+
+
     steps:
+
 
 
 
@@ -275,22 +372,29 @@ stages:
     # NODE
     # ==========================
 
+
     - task: NodeTool@0
+
 
       displayName: Install Node 22
 
 
       inputs:
 
+
         versionSpec: '22.x'
 
 
 
+
+
     # ==========================
-    # INSTALL PACKAGES
+    # NPM INSTALL
     # ==========================
 
+
     - script: |
+
 
         cd Frontend
 
@@ -301,11 +405,15 @@ stages:
 
 
 
+
+
     # ==========================
-    # BUILD ANGULAR
+    # ANGULAR BUILD
     # ==========================
 
+
     - script: |
+
 
         cd Frontend
 
@@ -316,9 +424,12 @@ stages:
 
 
 
+
+
     # ==========================
-    # ARTIFACT FRONTEND
+    # FRONTEND ARTIFACT
     # ==========================
+
 
     - task: PublishBuildArtifacts@1
 
@@ -328,6 +439,8 @@ stages:
 
       inputs:
 
+
         pathToPublish: Frontend/dist
+
 
         artifactName: frontend
