@@ -150,7 +150,7 @@ stages:
     - powershell: |
 
 
-        dotnet test "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
+        dotnet test "tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
           --configuration $(buildConfiguration) `
           --logger "trx" `
           --results-directory "$(Agent.TempDirectory)\TestResults" `
