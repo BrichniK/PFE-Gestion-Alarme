@@ -9,22 +9,24 @@ using Microsoft.EntityFrameworkCore;
 namespace CollectManagement.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext : DbContext
-{ public ApplicationDbContext(
+{
+    public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options) 
         : base(options)
     {
     }
 
     public DbSet<Utilisateur> Utilisateurs { get; set; }
-    
+
     public DbSet<RoleUtilisateur> RoleUtilisateurs { get; set; }
 
     public DbSet<Societe> Societes { get; set; }
-    
+
     public DbSet<Alerte> Alertes { get; set; }
 
     public DbSet<Device> Devices { get; set; }
 
+    public DbSet<Type> Types { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
