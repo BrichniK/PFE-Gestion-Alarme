@@ -5,6 +5,7 @@ using CollectManagementDomain.Societes;
 using CollectManagementDomain.Societes.ValueObjects;
 using CollectManagement.Infrastructure.Persistence.Context;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace CollectManagement.Infrastructure.Persistence.Seed;
 
@@ -18,7 +19,7 @@ public static class DatabaseSeeder
         var context = scope.ServiceProvider
             .GetRequiredService<ApplicationDbContext>();
 
-
+        await context.Database.MigrateAsync();
         if (await context.Utilisateurs.AnyAsync())
         {
             return;
@@ -68,7 +69,7 @@ public static class DatabaseSeeder
 
         var utilisateur = Utilisateur.Create(
             new UtilisateurId(
-                Ulid.Parse("018B1055-D0B7-DE38-752F-1B18F580C2E2")),
+                Ulid.Parse("01HC85BM5QVRW7ABRV33TR1GQ2")),
 
             "root",
             "CST",

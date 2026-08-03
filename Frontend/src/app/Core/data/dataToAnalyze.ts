@@ -1,4 +1,4 @@
-﻿export const DATA_TO_ANALYZE = [
+export const DATA_TO_ANALYZE = [
     /*eslint-disable*/
     {
         Date: "1/6/08",

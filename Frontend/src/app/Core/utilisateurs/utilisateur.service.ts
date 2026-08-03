@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, tap, map, catchError } from 'rxjs';
 import { PagedUtilisateur, Utilisateur } from './utilisateur.model';
 import { ApiService } from '../common/api.service';
 import { ApiResponse } from '../common/api-response';
-import { Societe } from '../Societe/societe.model';
+import { Societe } from '../societe/societe.model';
 
 @Injectable({
     providedIn: 'root'

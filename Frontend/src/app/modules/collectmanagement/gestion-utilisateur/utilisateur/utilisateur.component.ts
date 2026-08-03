@@ -34,8 +34,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute } from '@angular/router';
 import { FuseNavigationAction } from '../../../../../@fuse/components/navigation';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
-import { PagedSociete, Societe } from '../../../../core/Societe/societe.model';
-import { SocieteService } from '../../../../core/Societe/societe.service';
+import { PagedSociete, Societe } from '../../../../core/societe/societe.model';
+import { SocieteService } from '../../../../core/societe/societe.service';
 import { TranslocoDirective } from '@ngneat/transloco';
 
 @Component({

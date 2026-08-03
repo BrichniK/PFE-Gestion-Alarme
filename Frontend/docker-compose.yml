@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+
+  frontend:
+    image: brichnik/gestion-alarme-pfe:frontend-latest
+    container_name: gestion-alarme-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+
+  backend:
+    image: brichnik/gestion-alarme-pfe:backend-latest
+    container_name: gestion-alarme-backend
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=CollectManagementDb;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True"
+
+      MQTT__Host: mosquitto
+      MQTT__Port: 1883
+
+    depends_on:
+      - sqlserver
+      - mosquitto
+
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gestion-alarme-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourPassword123!"
+    ports:
+      - "1433:1433"
+
+    volumes:
+      - sql_data:/var/opt/mssql
+
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: gestion-alarme-mqtt
+    ports:
+      - "1883:1883"
+
+
+volumes:
+  sql_data:

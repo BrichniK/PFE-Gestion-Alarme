@@ -1,4 +1,4 @@
-ï»¿import { ActivatedRouteSnapshot, Routes } from '@angular/router';
+import { ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { inject } from '@angular/core';
 import { UserService } from '../../../core/user/user.service';
 import { JourFerieComponent } from './jour-ferie.component';
@@ -13,7 +13,7 @@ export default [
             navigation: (route: ActivatedRouteSnapshot) =>
                 inject(UserService).getNavigation(route.data.navigationId),
         },
-        title: 'Jour FÃ©riÃ©',
+        title: 'Jour Férié',
     },
 ] as Routes;
 

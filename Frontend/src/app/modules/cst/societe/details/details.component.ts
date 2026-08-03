@@ -26,9 +26,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { fuseAnimations } from '../../../../../@fuse/animations';
 import { MatPaginator } from '@angular/material/paginator';
-import { Societe } from '../../../../core/Societe/societe.model';
+import { Societe } from '../../../../core/societe/societe.model';
 import { catchError, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
-import { SocieteService } from '../../../../core/Societe/societe.service';
+import { SocieteService } from '../../../../core/societe/societe.service';
 import { FuseConfirmationService } from '../../../../../@fuse/services/confirmation';
 import { SecurefilePipe } from '../../../../core/pipes/securefile.pipe';
 

@@ -9,8 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CollectManagement.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext : DbContext
-{
-    public ApplicationDbContext(
+{ public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options) 
         : base(options)
     {
@@ -22,17 +21,16 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Societe> Societes { get; set; }
     
-    
     public DbSet<Alerte> Alertes { get; set; }
 
     public DbSet<Device> Devices { get; set; }
 
-    public DbSet<Type> Types { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(
-            new AlerteConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly
+        );
 
         base.OnModelCreating(modelBuilder);
     }

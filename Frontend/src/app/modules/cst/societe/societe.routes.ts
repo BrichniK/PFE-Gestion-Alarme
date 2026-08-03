@@ -4,7 +4,7 @@ import { catchError, of } from 'rxjs';
 import { SocieteComponent } from './societe.component';
 import { ListComponent } from './list/list.component';
 import { DetailsComponent } from './details/details.component';
-import { SocieteService } from '../../../core/Societe/societe.service';
+import { SocieteService } from '../../../core/societe/societe.service';
 import { UserService } from '../../../core/user/user.service';
 
 

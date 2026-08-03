@@ -1,4 +1,4 @@
-﻿import { Layout } from './table.model';
+import { Layout } from './table.model';
 
 const layouts:Layout[] = [{
     key: 0,

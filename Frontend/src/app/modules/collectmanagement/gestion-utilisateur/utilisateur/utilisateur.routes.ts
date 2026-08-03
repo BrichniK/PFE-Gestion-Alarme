@@ -1,4 +1,4 @@
-﻿import { UtilisateurComponent } from './utilisateur.component';
+import { UtilisateurComponent } from './utilisateur.component';
 import { utilisateurResolver } from './utilisateur.resolver';
 import { ActivatedRouteSnapshot, Routes } from '@angular/router';
 import { inject } from '@angular/core';
