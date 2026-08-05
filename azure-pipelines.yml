@@ -279,98 +279,90 @@ stages:
 
 
 
-#========================================================
-# FRONTEND
-#========================================================
 
+# =====================================================
+# FRONTEND ANGULAR
+# =====================================================
 
-- stage: Frontend
+- stage: Frontend_Build
 
-  displayName: Frontend
-
-  dependsOn: Backend
-
+  displayName: Build Angular Frontend
 
 
   jobs:
 
+  - job: Build_Angular
 
-  - job: BuildAngular
-
-    displayName: Build Angular
-
+    displayName: Build Angular Application
 
 
     steps:
 
 
-
-    - checkout: self
-
-      clean: true
-
-
-
-
-
+    # ==========================
     # NODE
+    # ==========================
 
-    - task: NodeTool@0
+    - task: UseNode@1
 
       displayName: Install Node 22
 
       inputs:
 
-        versionSpec: 22.x
+        version: '22.x'
 
 
 
-
-
+    # ==========================
     # CLEAN NODE MODULES
+    # ==========================
 
     - powershell: |
 
-        if (Test-Path "Frontend/node_modules") {
+        cd Frontend
 
-            Remove-Item "Frontend/node_modules" -Recurse -Force
+        if (Test-Path node_modules) {
+            Remove-Item node_modules -Recurse -Force
+        }
 
+        if (Test-Path package-lock.json) {
+            npm cache clean --force
         }
 
 
-      displayName: Clean node_modules
+      displayName: Clean Angular Dependencies
 
 
 
 
+    # ==========================
+    # INSTALL
+    # ==========================
 
-    # INSTALL DEPENDENCIES
 
-    - script: |
+    - powershell: |
 
         cd Frontend
 
-        npm config set registry https://registry.npmjs.org/
-
-        npm config set fetch-retries 5
-
-        npm install --legacy-peer-deps --no-audit --no-fund
+        npm install --verbose
 
 
-      displayName: npm install
+      displayName: Install Angular Packages
 
 
 
 
 
-    # VERIFY ANGULAR PACKAGE
+    # ==========================
+    # VERIFY
+    # ==========================
 
-    - script: |
+
+    - powershell: |
 
         cd Frontend
 
         npm list @angular-devkit/build-angular
-
 
       displayName: Verify Angular Builder
 
@@ -378,9 +370,12 @@ stages:
 
 
 
-    # BUILD ANGULAR
+    # ==========================
+    # BUILD
+    # ==========================
 
-    - script: |
+
+    - powershell: |
 
         cd Frontend
 
@@ -393,14 +388,18 @@ stages:
 
 
 
-    # FRONTEND ARTIFACT
+    # ==========================
+    # ARTIFACT
+    # ==========================
+
 
     - task: PublishBuildArtifacts@1
 
-      displayName: Frontend Artifact
+      displayName: Publish Frontend Artifact
+
 
       inputs:
 
-        PathtoPublish: Frontend/dist
+        pathToPublish: Frontend/dist
 
-        ArtifactName: frontend
+        artifactName: frontend
