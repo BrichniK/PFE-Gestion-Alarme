@@ -1,5 +1,5 @@
 # ASP.NET Core (.NET 8)
-# Build + Unit Tests + Coverage + SonarCloud + Artifacts
+# Build + Unit Tests + Coverage + SonarQube + Artifacts
 
 
 trigger:
@@ -7,32 +7,30 @@ trigger:
 
 
 pool:
-  name: AlertAgent
+  name: AlertAgent1
 
 
 variables:
-  buildConfiguration: 'Release'
+  BuildConfiguration: Release
 
 
 
 stages:
 
 
-
-# =====================================================
+#========================================================
 # BACKEND
-# =====================================================
+#========================================================
 
+- stage: Backend
 
-- stage: Backend_Build
-
-  displayName: Build Backend API
+  displayName: Backend Build
 
 
   jobs:
 
 
-  - job: Build_API
+  - job: BuildBackend
 
     displayName: Build .NET Backend
 
@@ -40,11 +38,29 @@ stages:
     steps:
 
 
+    - checkout: self
+      clean: true
 
-    # ==========================
-    # INSTALL .NET 8
-    # ==========================
 
+
+    # JAVA 17
+
+    - powershell: |
+
+        $javaHome="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
+
+        Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
+
+        Write-Host "##vso[task.setvariable variable=PATH]$javaHome\bin;$env:PATH"
+
+        java -version
+
+
+      displayName: Configure Java 17
+
+
+
+    # DOTNET 8
 
     - task: UseDotNet@2
 
@@ -54,20 +70,32 @@ stages:
 
         packageType: sdk
 
-        version: '8.x'
+        version: 8.x
 
 
 
 
 
-    # ==========================
+    - powershell: |
+
+        echo $env:JAVA_HOME
+
+        java -version
+
+        dotnet --version
+
+
+      displayName: Environment Check
+
+
+
+
+
     # RESTORE
-    # ==========================
-
 
     - task: DotNetCoreCLI@2
 
-      displayName: Restore Backend
+      displayName: Restore
 
       inputs:
 
@@ -79,296 +107,205 @@ stages:
 
 
 
-    # ==========================
-    # SONARCLOUD PREPARE
-    # ==========================
+    # SONARQUBE PREPARE
 
+    - task: SonarQubePrepare@7
 
-    - task: SonarCloudPrepare@3
-
-      displayName: Prepare SonarCloud
-
+      displayName: SonarQube Prepare
 
       inputs:
 
+        SonarQube: SonarQubeConnection
 
-        SonarCloud: 'SonarCloudConnection'
+        scannerMode: dotnet
 
+        projectKey: GestionAlarmePFE
 
-        organization: 'khalilbrichni'
-
-
-        scannerMode: 'dotnet'
-
-
-        projectKey: 'khalilbrichni'
-
+        projectName: GestionAlarmePFE
 
         extraProperties: |
 
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/tests/**
+          sonar.sourceEncoding=UTF-8
 
-          sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/TestResults/**/coverage.opencover.xml
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
+
+          sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
+
+          sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
 
 
 
 
 
-    # ==========================
-    # BUILD BACKEND
-    # ==========================
-
+    # BUILD
 
     - task: DotNetCoreCLI@2
-
 
       displayName: Build Backend
 
-
       inputs:
-
 
         command: build
 
-
         projects: Backend/CST.LePoint.sln
 
+        arguments: '--configuration $(BuildConfiguration) --no-restore'
 
-        arguments: '--configuration $(buildConfiguration)'
 
 
 
 
-
-    # ==========================
-    # DEBUG PATH PROJECTS
-    # ==========================
-
-
-    - powershell: |
-
-
-        Write-Host "Current directory:"
-        Get-Location
-
-
-        Write-Host ""
-
-        Write-Host "Repository content:"
-
-        Get-ChildItem "$(Build.SourcesDirectory)"
-
-
-
-        Write-Host ""
-
-        Write-Host "Searching csproj files..."
-
-        Get-ChildItem "$(Build.SourcesDirectory)" -Recurse -Filter "*.csproj" |
-        Select-Object FullName
-
-
-      displayName: Find Project Files
-
-
-
-
-
-    # ==========================
-    # UNIT TEST + COVERAGE
-    # ==========================
-
-
-    - powershell: |
-
-
-        dotnet test "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
-          --configuration $(buildConfiguration) `
-          --logger "trx" `
-          --results-directory "$(Agent.TempDirectory)\TestResults" `
-          --collect:"XPlat Code Coverage" `
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
-
-      displayName: Run Unit Tests + Coverage
-
-
-
-
-
-    # ==========================
-    # CHECK COVERAGE FILE
-    # ==========================
-
-
-    - powershell: |
-
-
-        Write-Host "Searching coverage files..."
-
-
-        Get-ChildItem "$(Agent.TempDirectory)" -Recurse `
-        -Include coverage.opencover.xml,*.trx `
-        -ErrorAction SilentlyContinue |
-        Select-Object FullName
-
-
-      displayName: Check Coverage Files
-
-
-
-
-
-    # ==========================
-    # TEST RESULTS
-    # ==========================
-
-
-    - task: PublishTestResults@2
-
-
-      displayName: Publish Unit Test Results
-
-
-      inputs:
-
-
-        testResultsFormat: VSTest
-
-
-        testResultsFiles: '**/*.trx'
-
-
-        searchFolder: '$(Agent.TempDirectory)\TestResults'
-
-
-        failTaskOnFailedTests: true
-
-
-
-
-
-    # ==========================
-    # COVERAGE
-    # ==========================
-
-
-    - task: PublishCodeCoverageResults@2
-
-
-      displayName: Publish Code Coverage
-
-
-      inputs:
-
-
-        codeCoverageTool: Cobertura
-
-
-        summaryFileLocation: '$(Agent.TempDirectory)\TestResults\**\coverage.opencover.xml'
-
-
-
-
-
-    # ==========================
-    # SONARCLOUD ANALYZE
-    # ==========================
-
-
-    - task: SonarCloudAnalyze@3
-
-
-      displayName: Analyze with SonarCloud
-
-
-
-
-
-    - task: SonarCloudPublish@3
-
-
-      displayName: Publish SonarCloud Result
-
-
-      inputs:
-
-
-        pollingTimeoutSec: '300'
-
-
-
-
-
-    # ==========================
-    # PUBLISH API
-    # ==========================
-
+    # TESTS + COVERAGE
 
     - task: DotNetCoreCLI@2
 
+      displayName: Run Unit Tests + Coverage
+
+      inputs:
+
+        command: test
+
+        projects: Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj
+
+        publishTestResults: false
+
+        arguments: >
+
+          --configuration $(BuildConfiguration)
+
+          --no-build
+
+          --logger "trx;LogFileName=test-results.trx"
+
+          --results-directory "$(Build.SourcesDirectory)/TestResults"
+
+          --collect:"XPlat Code Coverage"
+
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+
+
+
+
+    # CHECK FILES
+
+    - powershell: |
+
+        Write-Host "TRX"
+
+        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
+
+
+        Write-Host "Coverage"
+
+        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
+
+
+      displayName: Check Coverage
+
+      condition: always()
+
+
+
+
+
+    # PUBLISH TEST
+
+    - task: PublishTestResults@2
+
+      displayName: Publish Tests
+
+      condition: always()
+
+      inputs:
+
+        testResultsFormat: VSTest
+
+        testResultsFiles: '**/*.trx'
+
+        searchFolder: '$(Build.SourcesDirectory)/TestResults'
+
+
+
+
+
+    # SONAR ANALYZE
+
+    - task: SonarQubeAnalyze@7
+
+      displayName: Sonar Analyze
+
+
+
+
+
+    # QUALITY GATE
+
+    - task: SonarQubePublish@7
+
+      displayName: Quality Gate
+
+      inputs:
+
+        pollingTimeoutSec: 300
+
+
+
+
+
+    # PUBLISH API
+
+    - task: DotNetCoreCLI@2
 
       displayName: Publish API
 
-
       inputs:
-
 
         command: publish
 
-
         projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
 
-
-        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
 
 
 
 
-    # ==========================
-    # ARTIFACT BACKEND
-    # ==========================
 
+    # BACKEND ARTIFACT
 
     - task: PublishBuildArtifacts@1
 
-
-      displayName: Publish Backend Artifact
-
+      displayName: Backend Artifact
 
       inputs:
 
+        PathtoPublish: $(Build.ArtifactStagingDirectory)/Backend
 
-        pathToPublish: $(Build.ArtifactStagingDirectory)
-
-
-        artifactName: backend
+        ArtifactName: backend
 
 
 
 
 
+#========================================================
+# FRONTEND
+#========================================================
 
 
-# =====================================================
-# FRONTEND ANGULAR
-# =====================================================
+- stage: Frontend
 
+  displayName: Frontend
 
-- stage: Frontend_Build
-
-  displayName: Build Angular Frontend
+  dependsOn: Backend
 
 
 
   jobs:
 
 
-  - job: Build_Angular
+  - job: BuildAngular
 
-
-    displayName: Build Angular Application
+    displayName: Build Angular
 
 
 
@@ -376,52 +313,82 @@ stages:
 
 
 
-    # ==========================
-    # NODE
-    # ==========================
+    - checkout: self
 
+      clean: true
+
+
+
+
+
+    # NODE
 
     - task: NodeTool@0
 
-
       displayName: Install Node 22
-
 
       inputs:
 
-
-        versionSpec: '22.x'
-
+        versionSpec: 22.x
 
 
 
 
-    # ==========================
-    # INSTALL
-    # ==========================
 
+    # CLEAN NODE MODULES
+
+    - powershell: |
+
+        if (Test-Path "Frontend/node_modules") {
+
+            Remove-Item "Frontend/node_modules" -Recurse -Force
+
+        }
+
+
+      displayName: Clean node_modules
+
+
+
+
+
+    # INSTALL DEPENDENCIES
 
     - script: |
-
 
         cd Frontend
 
-        npm ci
+        npm config set registry https://registry.npmjs.org/
+
+        npm config set fetch-retries 5
+
+        npm install --legacy-peer-deps --no-audit --no-fund
 
 
-      displayName: Install Angular Dependencies
+      displayName: npm install
 
 
 
 
 
-    # ==========================
-    # BUILD
-    # ==========================
-
+    # VERIFY ANGULAR PACKAGE
 
     - script: |
 
+        cd Frontend
+
+        npm list @angular-devkit/build-angular
+
+
+      displayName: Verify Angular Builder
+
+
+
+
+
+    # BUILD ANGULAR
+
+    - script: |
 
         cd Frontend
 
@@ -434,21 +401,14 @@ stages:
 
 
 
-    # ==========================
-    # ARTIFACT FRONTEND
-    # ==========================
-
+    # FRONTEND ARTIFACT
 
     - task: PublishBuildArtifacts@1
 
-
-      displayName: Publish Frontend Artifact
-
+      displayName: Frontend Artifact
 
       inputs:
 
+        PathtoPublish: Frontend/dist
 
-        pathToPublish: Frontend/dist
-
-
-        artifactName: frontend
+        ArtifactName: frontend
