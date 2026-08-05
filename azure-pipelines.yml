@@ -158,9 +158,7 @@ stages:
     # TESTS + COVERAGE
 
     - task: DotNetCoreCLI@2
-
       displayName: Run Unit Tests + Coverage
-
       inputs:
 
         command: test
@@ -170,17 +168,11 @@ stages:
         publishTestResults: false
 
         arguments: >
-
           --configuration $(BuildConfiguration)
-
           --no-build
-
           --logger "trx;LogFileName=test-results.trx"
-
           --results-directory "$(Build.SourcesDirectory)/TestResults"
-
           --collect:"XPlat Code Coverage"
-
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
