@@ -1,7 +1,7 @@
 ﻿
 using Carter;
 using Microsoft.OpenApi.Models;
-
+using Microsoft.Extensions.DependencyInjection;
 namespace CollectManagement.WebAPI;
 
 public static class DependencyInjection

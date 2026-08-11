@@ -6,8 +6,9 @@ WORKDIR /src
 COPY . .
 
 
-RUN dotnet restore CollectManagement.WebAPI.csproj
-
+RUN dotnet restore src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj \
+    --configuration Release \
+    --no-restore
 
 RUN dotnet publish CollectManagement.WebAPI.csproj \
     -c Release \

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
 using CollectManagement.Domain.Common;
@@ -15,31 +14,35 @@ public static class EnumHelper
             .Select(GetEnumInfo)
             .ToList();
     }
-    
-    private static string GetEnumDescription<TEnum>(TEnum value) where TEnum : Enum
-    {
-        var field = value.GetType().GetField(value.ToString()) ?? null;
-        var attribute = field?.GetCustomAttribute<DescriptionAttribute>();
-        return attribute == null ? value.ToString() : attribute.Description;
-    }
 
     private static EnumInfo GetEnumInfo<TEnum>(TEnum value) where TEnum : Enum
     {
-        var type = typeof(TEnum); 
-        var memberInfo = type.GetMember(value.ToString()).FirstOrDefault(); 
-        var displayAttribute = memberInfo?.GetCustomAttribute<DisplayAttribute>();
-        var displayAjAttribute = memberInfo?.GetCustomAttribute<DisplayAjAttribute>();
-        
+        var type = typeof(TEnum);
+        var memberInfo = type.GetMember(value.ToString()).FirstOrDefault();
+
+        var displayAttribute =
+            memberInfo?.GetCustomAttribute<DisplayAttribute>();
+
+        var displayAjAttribute =
+            memberInfo?.GetCustomAttribute<DisplayAjAttribute>();
+
         return new EnumInfo
         {
             Id = Convert.ToInt32(value, CultureInfo.InvariantCulture),
-            Value = displayAttribute?.Name ?? displayAjAttribute?.Name ?? value.ToString(),
-            TextColor = displayAttribute?.ShortName ?? displayAjAttribute?.ForegroundColor ?? "",
-            Color = displayAttribute?.GroupName ?? displayAjAttribute?.BackgroundColor ?? ""
+            Value = displayAttribute?.Name
+                    ?? displayAjAttribute?.Name
+                    ?? value.ToString(),
+
+            TextColor = displayAttribute?.ShortName
+                        ?? displayAjAttribute?.ForegroundColor
+                        ?? "",
+
+            Color = displayAttribute?.GroupName
+                    ?? displayAjAttribute?.BackgroundColor
+                    ?? ""
         };
     }
 }
-
 
 public class EnumInfo
 {

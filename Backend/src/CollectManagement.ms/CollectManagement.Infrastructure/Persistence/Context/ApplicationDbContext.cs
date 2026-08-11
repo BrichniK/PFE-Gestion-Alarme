@@ -1,17 +1,19 @@
-﻿using CollectManagement.Domain.Alertes;
+﻿
+using CollectManagement.Domain.Alertes;
 using CollectManagement.Domain.Devices;
+using CollectManagement.Domain.Types;
 using CollectManagement.Domain.Utilisateurs;
 using CollectManagement.Domain.Utilisateurs.Entities;
-using CollectManagement.Infrastructure.Persistence.Configurations.AlerteConfigurations;
 using CollectManagementDomain.Societes;
 using Microsoft.EntityFrameworkCore;
+using Type = CollectManagement.Domain.Types.Type;
 
 namespace CollectManagement.Infrastructure.Persistence.Context;
 
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(
-        DbContextOptions<ApplicationDbContext> options) 
+        DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
@@ -30,10 +32,11 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(ApplicationDbContext).Assembly
-        );
-
         base.OnModelCreating(modelBuilder);
+
+        // Charge automatiquement toutes les configurations
+        // IEntityTypeConfiguration<T> présentes dans l'assembly Infrastructure.
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly);
     }
 }
