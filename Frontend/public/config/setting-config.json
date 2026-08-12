@@ -1,4 +1,3 @@
 {
-
-    "baseApi": "http://localhost:6064/cm/"
+  "baseApi": "http://20.251.73.150/cm/"
 }

@@ -67,6 +67,6 @@ public class UtilisateurConfiguration
             .HasForeignKey(k => k.RoleUtilisateurId)
             .OnDelete(DeleteBehavior.Restrict);
         
-        //builder.HasData(UtilisateurSeed.Data);
+      
     }
 }

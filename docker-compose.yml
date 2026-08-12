@@ -4,6 +4,7 @@ services:
     image: brichnik/gestion-alarme-pfe:frontend-latest
     container_name: gestion-alarme-frontend
 
+
     ports:
       - "80:80"
 
@@ -26,7 +27,6 @@ services:
       # Connexion vers ta vraie base SQL Server locale
       ConnectionStrings__SqlServerConnection: "Server=host.docker.internal;Database=PFEGestionAlert;User Id=sa;Password=@dmin123;TrustServerCertificate=True"
 
-
       # MQTT
       Mqtt__Broker: mosquitto
       Mqtt__Port: 1883
@@ -35,10 +35,8 @@ services:
       Mqtt__ClientId: CollectManagement-Client
       Mqtt__Topic: "ALARME/+/+"
 
-
     depends_on:
       - mosquitto
-
 
 
   mosquitto:

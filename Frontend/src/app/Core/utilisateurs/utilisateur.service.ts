@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, tap, map, catchError } from 'rxjs';
 import { PagedUtilisateur, Utilisateur } from './utilisateur.model';
 import { ApiService } from '../common/api.service';
 import { ApiResponse } from '../common/api-response';
-import { Societe } from '../societe/societe.model';
+import { Societe  } from '../societe/societe.model';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +13,7 @@ export class UtilisateurService {
     private _utilisateurs: BehaviorSubject<Utilisateur[] | null> = new BehaviorSubject([]);
     private _utilisateur: BehaviorSubject<Utilisateur | null> = new BehaviorSubject(null);
     private _utilisateursLength: BehaviorSubject<number | null> = new BehaviorSubject(0);
-    private _societes: BehaviorSubject<Societe[] | null> = new BehaviorSubject(null);
+    private _societes: BehaviorSubject<Societe [] | null> = new BehaviorSubject(null);
 
     constructor(private _apiservice: ApiService) {}
 
@@ -50,8 +50,8 @@ export class UtilisateurService {
     }
 
 
-    GetSocietes(): Observable<Societe[]> {
-        return this._apiservice.Get<Societe[]>('societe/list').pipe(
+    GetSocietes(): Observable<Societe []> {
+        return this._apiservice.Get<Societe []>('societe/list').pipe(
             map((response) => response.data ?? [])
         );
     }

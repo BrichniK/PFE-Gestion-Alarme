@@ -2,7 +2,7 @@
     "name": "cst-F3S",
     "version": "1.0.1",
     "description": "F3S project",
-    "author": "AymenJELJLI",
+    "author": "KhalilBrichni",
     "private": true,
     "scripts": {
         "ng": "ng",
