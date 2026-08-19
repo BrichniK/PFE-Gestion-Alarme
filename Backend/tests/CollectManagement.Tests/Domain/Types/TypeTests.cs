@@ -3,7 +3,7 @@ using CollectManagement.Domain.Types.ValueObjects;
 using FluentAssertions;
 using Type = CollectManagement.Domain.Types.Type;
 
-namespace CollectManagement.Tests.Features.Domain.Types;
+namespace CollectManagement.Tests.Domain.Types;
 
 
 public class TypeTests
