@@ -196,4 +196,23 @@ public class AlerteRepository : RepositoryBase<Alerte>, IAlerteRepository
             .ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<Alerte>> GetRecentByDeviceIdAsync(
+        DeviceId deviceId,
+        int count,
+        CancellationToken cancellationToken)
+    {
+        if (count <= 0)
+        {
+            return Array.Empty<Alerte>();
+        }
+
+        return await _dbSet
+            .AsNoTracking()
+            .Include(a => a.Type)
+            .Where(a => a.DispositifId == deviceId)
+            .OrderByDescending(a => a.Date)
+            .Take(count)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

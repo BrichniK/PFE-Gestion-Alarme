@@ -40,25 +40,64 @@ export class DeviceService {
         return this._captureStates.asObservable();
     }
 
-    GetDevice(
-        page: number = 1,
-        size: number = 10,
-        sort: string = '',
-        order: 'asc' | 'desc' | '' = 'asc',
-        search: string = ''
-    ): Observable<PagedDevice> {
-        return this._apiservice
-            .Get<PagedDevice>('device/list', {
-                params: { search: search || '', sort, order, page, size },
+GetDevice(
+    page: number = 1,
+    size: number = 10,
+    sort: string = '',
+    order: 'asc' | 'desc' | '' = 'asc',
+    search: string = ''
+): Observable<PagedDevice> {
+
+    return this._apiservice
+        .Get<any>('device/list', {
+            params: {
+                search: search || '',
+                sort: sort || '',
+                order: order || 'asc',
+                page,
+                size
+            },
+        })
+        .pipe(
+            map((response) => {
+
+                console.log('========== DEVICE API RESPONSE ==========');
+                console.log(response);
+
+                const data = response?.data ?? response;
+
+                // Plusieurs formats possibles selon ton backend
+                const devices =
+                    data?.devices ??
+                    data?.items ??
+                    data?.data ??
+                    (Array.isArray(data) ? data : []);
+
+                const length =
+                    data?.length ??
+                    data?.totalCount ??
+                    data?.total ??
+                    data?.count ??
+                    devices.length;
+
+                const result: PagedDevice = {
+                    devices: devices ?? [],
+                    length: Number(length) || 0
+                };
+
+                return result;
+            }),
+
+            tap((result) => {
+
+                console.log('========== DEVICES NORMALIZED ==========');
+                console.log(result);
+
+                this._devices.next(result.devices);
+                this._devicesLength.next(result.length);
             })
-            .pipe(
-                tap((result) => {
-                    this._devices.next(result.data?.devices ?? []);
-                    this._devicesLength.next(result.data?.length);
-                }),
-                map((r) => r.data)
-            );
-    }
+        );
+}
 
     CreateNewDevice(): Observable<Device> {
         const newDevice: Device = {

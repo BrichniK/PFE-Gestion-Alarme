@@ -1,6 +1,7 @@
 ﻿
 using CollectManagement.Domain.Alertes;
 using CollectManagement.Domain.Devices;
+using CollectManagement.Domain.SensorMeasurements;
 using CollectManagement.Domain.Types;
 using CollectManagement.Domain.Utilisateurs;
 using CollectManagement.Domain.Utilisateurs.Entities;
@@ -29,6 +30,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Device> Devices { get; set; }
 
     public DbSet<Type> Types { get; set; }
+    
+    public DbSet<SensorMeasurement> SensorMeasurements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,5 +1,8 @@
 using System.Text;
 using System.Globalization;
+using CollectManagement.Application.Interfaces.Repositories.SensorMeasurements;
+using CollectManagement.Domain.SensorMeasurements;
+using CollectManagement.Domain.SensorMeasurements.ValueObjects;
 using CollectManagement.Application.Interfaces.Employees;
 using CollectManagement.Application.Interfaces.Repositories.Alertes;
 using CollectManagement.Application.Interfaces.Repositories.ConfigurationGenerales;
@@ -42,6 +45,7 @@ public class MqttMessageHandler : IMqttMessageHandler
     private readonly IPlanningRepository _planningRepository;
     private readonly ISMSConfigurationRepository _smsConfigurationRepository;
     private readonly IConfigurationGeneraleRepository _configurationGeneraleRepository;
+    private readonly ISensorMeasurementRepository _sensorMeasurementRepository;
     
 
     public MqttMessageHandler(
@@ -60,7 +64,9 @@ public class MqttMessageHandler : IMqttMessageHandler
         IEmailService emailService,
         IPlanningRepository planningRepository,
         ISMSConfigurationRepository smsConfigurationRepository,
+        ISensorMeasurementRepository sensorMeasurementRepository,
         IConfigurationGeneraleRepository configurationGeneraleRepository)
+        
     {
         _logger = logger;
         _maintenanceRepository = maintenanceRepository;
@@ -78,7 +84,86 @@ public class MqttMessageHandler : IMqttMessageHandler
         _planningRepository = planningRepository;
         _smsConfigurationRepository = smsConfigurationRepository;
         _configurationGeneraleRepository = configurationGeneraleRepository;
+        _sensorMeasurementRepository = sensorMeasurementRepository;
     }
+
+private async Task HandleSensorMeasurementMessageAsync(
+    string payload,
+    string deviceMatricule,
+    string sensorCode)
+{
+    try
+    {
+        var json = JObject.Parse(payload);
+
+        var temperature = json["temperature"]?.Value<double?>();
+        var vibration = json["vibration"]?.Value<double?>();
+        var pressure = json["pressure"]?.Value<double?>();
+        var humidity = json["humidity"]?.Value<double?>();
+        var status = json["status"]?.Value<string>();
+
+        var isFailure =
+            string.Equals(status, "FAILURE", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(status, "CRITICAL", StringComparison.OrdinalIgnoreCase);
+
+        var device = await _deviceRepository.GetByMatriculeAsync(
+            deviceMatricule,
+            default);
+
+        if (device == null)
+        {
+            _logger.LogWarning(
+                "No Device found with Matricule '{Matricule}'",
+                deviceMatricule);
+
+            return;
+        }
+
+        var measurement = SensorMeasurement.Create(
+            new SensorMeasurementId(Ulid.NewUlid()),
+            device.DeviceId,
+            sensorCode,
+            DateTime.UtcNow,
+            temperature,
+            vibration,
+            pressure,
+            humidity,
+            isFailure);
+
+        await _sensorMeasurementRepository.AddAsync(
+            measurement,
+            default);
+
+        await _unitOfWork.SaveChangesAsync(default);
+
+        _logger.LogInformation(
+            "Sensor measurement saved - Device: {Device}, Sensor: {Sensor}, Temperature: {Temperature}, Vibration: {Vibration}, Pressure: {Pressure}, Humidity: {Humidity}, Failure: {IsFailure}",
+            deviceMatricule,
+            sensorCode,
+            temperature,
+            vibration,
+            pressure,
+            humidity,
+            isFailure);
+    }
+    catch (JsonReaderException ex)
+    {
+        _logger.LogError(
+            ex,
+            "Invalid JSON sensor measurement payload: {Payload}",
+            payload);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(
+            ex,
+            "Error processing sensor measurement from device {Device}",
+            deviceMatricule);
+    }
+}
+
+
+    
 
     public async Task HandleMessageAsync(MqttApplicationMessageReceivedEventArgs sender)
     {
@@ -116,9 +201,18 @@ public class MqttMessageHandler : IMqttMessageHandler
             {
                 await HandleAlarmeResetMessageAsync(deviceNumber);
             }
+            else if (section == "ALARME")
+            {
+                await HandleSensorMeasurementMessageAsync(
+                    payload,
+                    subSection,
+                    deviceNumber);
+            }
             else
             {
-                _logger.LogWarning("Unhandled topic: {Topic}", sender.ApplicationMessage.Topic);
+                _logger.LogWarning(
+                    "Unhandled topic: {Topic}",
+                    sender.ApplicationMessage.Topic);
             }
         }
         catch (Exception ex)

@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.Text.Json;
 using CollectManagement.Application.Common;
 using CollectManagement.Application.Exceptions;
+using CollectManagement.Infrastructure.AI;
 using CollectManagement.Application.Interfaces.Authentification;
 using CollectManagement.Application.Interfaces.Employees;
 using CollectManagement.Application.Interfaces.Groupes;
@@ -12,6 +13,7 @@ using CollectManagement.Application.Interfaces.Repositories.Devices;
 using CollectManagement.Application.Interfaces.Repositories.JoursFeries;
 using CollectManagement.Application.Interfaces.Repositories.Maintenances;
 using CollectManagement.Application.Interfaces.Repositories.Plannings;
+using CollectManagement.Application.Interfaces.Repositories.SensorMeasurements;
 using CollectManagement.Application.Interfaces.Repositories.Shifts;
 using CollectManagement.Application.Interfaces.Repositories.SMS;
 using CollectManagement.Application.Interfaces.Repositories.SMSConfigurations;
@@ -34,6 +36,7 @@ using CollectManagement.Infrastructure.Persistence.Repositories.GroupeRepositori
 using CollectManagement.Infrastructure.Persistence.Repositories.JourFerieRepositories;
 using CollectManagement.Infrastructure.Persistence.Repositories.MaintenanceRepositories;
 using CollectManagement.Infrastructure.Persistence.Repositories.PlanningRepositories;
+using CollectManagement.Infrastructure.Persistence.Repositories.SensorMeasurementRepositories;
 using CollectManagement.Infrastructure.Persistence.Repositories.ShiftRepositories;
 using CollectManagement.Infrastructure.Persistence.Repositories.SocieteRepositories;
 using CollectManagement.Infrastructure.Persistence.Repositories.SMSRepositories;
@@ -66,6 +69,10 @@ public static class DependencyInjection
         {
             options.SerializerOptions.Converters.Add(new NullableUlidJsonConverter());
         });
+        services.Configure<GeminiOptions>(
+            configuration.GetSection(GeminiOptions.SectionName));
+
+        services.AddScoped<IAiService, GeminiAiService>();
 
         services.AddScoped<AuditableInterceptor>();
         
@@ -135,6 +142,7 @@ public static class DependencyInjection
         services.AddScoped<IGroupeRepository, GroupeRepository>();
         services.AddScoped<IDeviceRepository, DeviceRepository>();
         services.AddScoped<IShiftRepository, ShiftRepository>();
+        services.AddScoped<ISensorMeasurementRepository, SensorMeasurementRepository>();
         services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
         services.AddScoped<IMaintenanceCaptureHistoryRepository, MaintenanceCaptureHistoryRepository>();
         services.AddScoped<IPlanningRepository, PlanningRepository>();

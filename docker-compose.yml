@@ -13,6 +13,9 @@ services:
 
 
   backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
     image: brichnik/gestion-alarme-pfe:backend-latest
     container_name: gestion-alarme-backend
 
@@ -22,7 +25,9 @@ services:
     environment:
 
       ASPNETCORE_ENVIRONMENT: Production
-
+      Gemini__ApiKey: ${GEMINI_API_KEY}
+      Gemini__Model: gemini-3.1-flash-lite
+      Gemini__TimeoutSeconds: 30
 
       # Connexion vers ta vraie base SQL Server locale
       ConnectionStrings__SqlServerConnection: "Server=host.docker.internal;Database=PFEGestionAlert;User Id=sa;Password=@dmin123;TrustServerCertificate=True"

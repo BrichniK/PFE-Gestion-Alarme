@@ -4,6 +4,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Google.GenAI" Version="1.18.0" />
     <PackageReference Include="Hangfire" Version="1.8.18" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageReference Include="HtmlToOpenXml.dll" Version="3.2.2" />

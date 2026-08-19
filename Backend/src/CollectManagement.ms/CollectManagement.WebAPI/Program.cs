@@ -11,6 +11,7 @@ using MQTTnet;
 using Serilog;
 using Worker = CollectManagement.WebAPI.Worker;
 using CollectManagement.WebAPI;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -131,7 +132,7 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint(
-        "/swagger/v1/swagger.json",
+        "v1/swagger.json",
         "Gestion Alarme API V1"
     );
 
@@ -188,7 +189,9 @@ app.MapCarter();
 app.MapHub<SignalRHub>(
     "/cm/signalHub"
 );
+app.UseHttpMetrics();
 
+app.MapMetrics();
 
 #endregion
 

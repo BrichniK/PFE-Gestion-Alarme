@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend
+  namespace: gestionalarme-dev
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+
+      containers:
+        - name: backend
+
+          image: brichnik/gestion-alarme-pfe:backend-latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          env:
+
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+
+            - name: ConnectionStrings__SqlServerConnection
+              valueFrom:
+                secretKeyRef:
+                  name: gestionalarme-secret
+                  key: ConnectionStrings__SqlServerConnection
+
+            - name: Mqtt__Broker
+              value: "mqtt-service"
+
+            - name: Mqtt__Port
+              value: "1883"
+
+            - name: Mqtt__Username
+              value: "admincst"
+
+            - name: Mqtt__Password
+              value: "Cst_2024*"
+
+            - name: Mqtt__ClientId
+              value: "CollectManagement-Client-DEV"
+
+            - name: Mqtt__Topic
+              value: "ALARME/+/+"

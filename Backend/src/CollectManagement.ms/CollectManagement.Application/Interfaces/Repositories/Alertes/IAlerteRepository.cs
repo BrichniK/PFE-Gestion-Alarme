@@ -21,24 +21,25 @@ public interface IAlerteRepository : IRepositoryBase<Alerte>
         CancellationToken cancellationToken
     );
 
-    Task UpdateBulkAsync(Alerte alerte, CancellationToken cancellationToken);
-
+    Task UpdateBulkAsync(
+        Alerte alerte,
+        CancellationToken cancellationToken);
 
     Task<Alerte?> GetLatestCaptureAlertByDeviceAndCodeAsync(
         DeviceId deviceId,
         string code,
         CancellationToken cancellationToken);
 
-    Task<IReadOnlyDictionary<string, Alerte>> GetLatestUnprocessedCaptureAlertsByDeviceAsync(
-        DeviceId deviceId,
-        CancellationToken cancellationToken);
+    Task<IReadOnlyDictionary<string, Alerte>>
+        GetLatestUnprocessedCaptureAlertsByDeviceAsync(
+            DeviceId deviceId,
+            CancellationToken cancellationToken);
 
     Task<Alerte?> GetLatestProcessedCaptureAlertByDeviceBeforeAsync(
         DeviceId deviceId,
         DateTime? before,
         CancellationToken cancellationToken);
 
-    
     Task<Alerte?> GetByDeviceIdAndDateAsync(
         DeviceId deviceId,
         DateTime date,
@@ -51,21 +52,18 @@ public interface IAlerteRepository : IRepositoryBase<Alerte>
         TypeId typeId,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Gets the latest unprocessed alert for a device.
-    /// Used to populate T1 when auto-creating a Maintenance from an alert.
-    /// </summary>
     Task<Alerte?> GetLatestUnprocessedByDeviceIdAsync(
         DeviceId deviceId,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Deletes all unprocessed alerts for a device with the given type code.
-    /// Returns the number of deleted alerts.
-    /// </summary>
     Task<int> DeleteUnprocessedByDeviceAndTypeCodeAsync(
         DeviceId deviceId,
         string typeCode,
         CancellationToken cancellationToken);
 
+    // Nouvelle méthode utilisée par l'analyse IA
+    Task<IReadOnlyList<Alerte>> GetRecentByDeviceIdAsync(
+        DeviceId deviceId,
+        int count,
+        CancellationToken cancellationToken);
 }

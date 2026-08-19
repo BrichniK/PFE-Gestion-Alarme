@@ -59,7 +59,7 @@ namespace CollectManagement.Infrastructure.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("Alerte");
+                    b.ToTable("Alertes");
                 });
 
             modelBuilder.Entity("CollectManagement.Domain.ConfigurationGenerales.ConfigurationGenerale", b =>
@@ -160,7 +160,7 @@ namespace CollectManagement.Infrastructure.Migrations
 
                     b.HasKey("DeviceId");
 
-                    b.ToTable("Device");
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("CollectManagement.Domain.Employess.Employee", b =>
@@ -636,6 +636,57 @@ namespace CollectManagement.Infrastructure.Migrations
                     b.ToTable("SMSConfiguration");
                 });
 
+            modelBuilder.Entity("CollectManagement.Domain.SensorMeasurements.SensorMeasurement", b =>
+                {
+                    b.Property<Guid>("SensorMeasurementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DateInsertion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateModification")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double?>("Humidity")
+                        .HasColumnType("float");
+
+                    b.Property<string>("InsererPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFailure")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("MeasuredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifierPar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Pressure")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SensorCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<double?>("Temperature")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Vibration")
+                        .HasColumnType("float");
+
+                    b.HasKey("SensorMeasurementId");
+
+                    b.HasIndex("DeviceId", "MeasuredAt");
+
+                    b.ToTable("SensorMeasurements");
+                });
+
             modelBuilder.Entity("CollectManagement.Domain.Shifts.Shift", b =>
                 {
                     b.Property<Guid>("ShiftId")
@@ -698,7 +749,7 @@ namespace CollectManagement.Infrastructure.Migrations
 
                     b.HasKey("TypeId");
 
-                    b.ToTable("Type");
+                    b.ToTable("Types");
                 });
 
             modelBuilder.Entity("CollectManagement.Domain.Utilisateurs.Entities.RoleUtilisateur", b =>

@@ -3,7 +3,6 @@
     <ProjectReference Include="..\CollectManagement.Domain\CollectManagement.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Features\" />
     <Folder Include="Features\Employees\" />
     <Folder Include="Features\Societes\" />
   </ItemGroup>

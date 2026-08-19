@@ -3,249 +3,608 @@
     <!-- Header -->
     <div
         class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 bg-white dark:bg-slate-800 border-b">
+
         <div class="flex-1 min-w-0">
+
             <!-- Breadcrumbs -->
             <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                <a class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">{{
-                    t('Fichier') }}</a>
-                <mat-icon class="icon-size-4 mx-2 text-gray-400" [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
-                <span>{{ t('Dispositif') }}</span>
+
+                <a
+                    class="hover:text-primary transition-colors cursor-pointer text-indigo-600 dark:text-indigo-400">
+                    {{ t('Fichier') }}
+                </a>
+
+                <mat-icon
+                    class="icon-size-4 mx-2 text-gray-400"
+                    [svgIcon]="'heroicons_solid:chevron-right'">
+                </mat-icon>
+
+                <span>
+                    {{ t('Dispositif') }}
+                </span>
+
             </div>
+
             <!-- Title -->
             <div class="mt-2 flex items-center">
-                <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
+
+                <h2
+                    class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:truncate">
                     {{ t('Dispositifs') }}
                 </h2>
+
                 <span
                     class="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+
                     {{ devicesLength }} {{ t('Total') }}
+
                 </span>
+
             </div>
+
         </div>
 
-        <!-- Actions -->
+        <!-- Actions Header -->
         <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4 space-x-3">
+
+            <!-- Search -->
             <div class="relative flex-1 sm:grow-0">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+
+                <span
+                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_outline:magnifying-glass'">
+                    </mat-icon>
+
                 </span>
-                <input type="text" [formControl]="searchInputControl" [placeholder]="t('Rechercher...')"
+
+                <input
+                    type="text"
+                    [formControl]="searchInputControl"
+                    [placeholder]="t('Rechercher...')"
                     class="block w-full sm:w-80 pl-10 pr-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-900 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm">
+
             </div>
 
+            <!-- Nouveau Device -->
             @if (hasActionPermission(FuseNavigationAction.Add)) {
-            <button (click)="CreateDevice()"
-                class="inline-flex items-center px-8 py-3.5 rounded-xl shadow-lg text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transform active:scale-95 transition-all"
-                style="background-color: #2E6C9F; --tw-ring-color: #2E6C9F;">
-                <mat-icon class="icon-size-6 mr-2 text-white" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-                <span>{{ t('Nouveau Dispositif') }}</span>
-            </button>
+
+                <button
+                    (click)="CreateDevice()"
+                    class="inline-flex items-center px-8 py-3.5 rounded-xl shadow-lg text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transform active:scale-95 transition-all"
+                    style="background-color: #2E6C9F; --tw-ring-color: #2E6C9F;">
+
+                    <mat-icon
+                        class="icon-size-6 mr-2 text-white"
+                        [svgIcon]="'heroicons_outline:plus'">
+                    </mat-icon>
+
+                    <span>
+                        {{ t('Nouveau Dispositif') }}
+                    </span>
+
+                </button>
+
             }
+
         </div>
 
     </div>
 
+
     <!-- Main Content -->
     <div class="flex-auto overflow-hidden p-6 sm:p-10">
+
+        <!-- Nouveau device -->
         @if (selectedDevice?.deviceId === 'new') {
-        <div class="mb-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Nouveau dispositif</h3>
+
+            <div
+                class="mb-6 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+
+                <div
+                    class="px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ t('Nouveau dispositif') }}
+                    </h3>
+
+                </div>
+
+                <ng-container
+                    *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: selectedDevice}">
+                </ng-container>
+
             </div>
-            <ng-container *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: selectedDevice}"></ng-container>
-        </div>
+
         }
 
+
+        <!-- Devices table -->
         <div
             class="flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-slate-700">
 
             <div class="flex-auto overflow-x-auto device-table-wrap">
-                <table class="device-table w-full text-left border-collapse min-w-[760px]">
+
+                <table
+                    class="device-table w-full text-left border-collapse min-w-[900px]">
+
+                    <!-- Header -->
                     <thead class="device-table__head sticky top-0 z-10">
+
                         <tr
                             class="text-gray-500 dark:text-gray-400 uppercase text-[11px] font-bold tracking-wider border-b border-gray-200 dark:border-slate-700">
+
                             <th
                                 class="px-6 py-4 font-semibold uppercase tracking-wider cursor-pointer hover:text-indigo-600 transition-colors">
+
                                 <div class="flex items-center">
+
                                     {{ t('Nom Dispositif') }}
-                                    <mat-icon class="icon-size-3 ml-1"
-                                        [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+
+                                    <mat-icon
+                                        class="icon-size-3 ml-1"
+                                        [svgIcon]="'heroicons_solid:chevron-down'">
+                                    </mat-icon>
+
                                 </div>
+
                             </th>
-                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Matricule') }}</th>
-                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">{{ t('Nombre Capteur') }}</th>
-                            <th class="pr-6 py-4 font-semibold uppercase tracking-wider text-right">{{ t('Actions') }}
+
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">
+                                {{ t('Matricule') }}
                             </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-                        @if(devices$ | async; as devices){
-                        @for( device of devices; track trackByFn($index, device)){
-                        <tr class="device-table__row group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div
-                                        class="device-avatar h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold uppercase ring-2 ring-gray-100 dark:ring-slate-700 shadow-sm">
-                                        <mat-icon class="icon-size-5"
-                                            [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
-                                    </div>
-                                    <div class="ml-4 flex items-center gap-2">
-                                        <div>
-                                            <div
-                                                class="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-xs">
-                                                {{ device.deviceName }}
-                                            </div>
-                                        </div>
-                                        <!-- Online/Offline Indicator -->
-                                        <div class="flex items-center gap-1">
-                                            @if (device.isOnline) {
-                                            <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
-                                                <div class="h-2 w-2 bg-green-600 dark:bg-green-500 rounded-full animate-pulse"></div>
-                                                <span class="text-xs font-medium text-green-700 dark:text-green-400">{{ t('Connecté') }}</span>
-                                            </div>
-                                            } @else {
-                                            <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
-                                                <div class="h-2 w-2 bg-red-600 dark:bg-red-500"></div>
-                                                <span class="text-xs font-medium text-red-700 dark:text-red-400">{{ t('Déconnecté') }}</span>
-                                            </div>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="device-chip device-chip--slate">{{ device.matricule }}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="device-chip device-chip--emerald">{{ device.nombreCapteur }} capteurs</span>
-                            </td>
-                            <td class="pr-6 py-4 text-right">
-                                <div class="flex items-center justify-end space-x-1">
-                                    <button mat-icon-button [matTooltip]="t('Modifier')"
-                                        (click)="toggleDetails(device.deviceId)"
-                                        class="device-action-btn device-action-btn--edit text-gray-400 hover:text-indigo-600 transition-colors">
-                                        <mat-icon class="icon-size-5"
-                                            [svgIcon]="selectedDevice?.deviceId === device.deviceId ? 'heroicons_solid:chevron-up' : 'heroicons_outline:pencil-square'"></mat-icon>
-                                    </button>
-                                    @if(hasActionPermission(FuseNavigationAction.Delete)){
-                                    <button mat-icon-button [matTooltip]="t('Supprimer')"
-                                        (click)="deleteSelectedDevice(device)"
-                                        class="device-action-btn device-action-btn--delete text-gray-400 hover:text-red-600 transition-colors">
-                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                    </button>
-                                    }
-                                </div>
-                            </td>
+
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">
+                                {{ t('Nombre Capteur') }}
+                            </th>
+
+                            <th class="px-6 py-4 font-semibold uppercase tracking-wider">
+                                {{ t('Statut') }}
+                            </th>
+
+                            <th
+                                class="pr-6 py-4 font-semibold uppercase tracking-wider text-right">
+                                {{ t('Actions') }}
+                            </th>
+
                         </tr>
 
-                        <!-- Details Row (Expanded) -->
-                        @if(selectedDevice?.deviceId === device.deviceId){
-                        <tr class="bg-gray-50/50 dark:bg-slate-700/20">
-                            <td colspan="4" class="px-0 py-0">
-                                <ng-container
-                                    *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: device}"></ng-container>
-                            </td>
-                        </tr>
-                        }
-                        }
+                    </thead>
+
+
+                    <!-- Body -->
+                    <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+
+                        @if (devices$ | async; as devices) {
+
+                            @for (device of devices; track trackByFn($index, device)) {
+
+                                <!-- Device row -->
+                                <tr
+                                    class="device-table__row group hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+
+                                    <!-- Device name -->
+                                    <td class="px-6 py-4">
+
+                                        <div class="flex items-center">
+
+                                            <div
+                                                class="device-avatar h-10 w-10 flex flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold uppercase ring-2 ring-gray-100 dark:ring-slate-700 shadow-sm">
+
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:cpu-chip'">
+                                                </mat-icon>
+
+                                            </div>
+
+
+                                            <div class="ml-4 flex items-center gap-2">
+
+                                                <div>
+
+                                                    <div
+                                                        class="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+
+                                                        {{ device.deviceName }}
+
+                                                    </div>
+
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+
+                                                        {{ device.matricule }}
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Matricule -->
+                                    <td class="px-6 py-4">
+
+                                        <span class="device-chip device-chip--slate">
+                                            {{ device.matricule }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Sensors -->
+                                    <td class="px-6 py-4">
+
+                                        <span class="device-chip device-chip--emerald">
+                                            {{ device.nombreCapteur }}
+                                            {{ t('capteurs') }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+                                    <td class="px-6 py-4">
+
+                                        @if (device.isOnline) {
+
+                                            <div
+                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+
+                                                <div
+                                                    class="h-2 w-2 bg-green-600 dark:bg-green-500 rounded-full animate-pulse">
+                                                </div>
+
+                                                <span
+                                                    class="text-xs font-medium text-green-700 dark:text-green-400">
+
+                                                    {{ t('Connecté') }}
+
+                                                </span>
+
+                                            </div>
+
+                                        } @else {
+
+                                            <div
+                                                class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+
+                                                <div
+                                                    class="h-2 w-2 bg-red-600 dark:bg-red-500 rounded-full">
+                                                </div>
+
+                                                <span
+                                                    class="text-xs font-medium text-red-700 dark:text-red-400">
+
+                                                    {{ t('Déconnecté') }}
+
+                                                </span>
+
+                                            </div>
+
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    <td class="pr-6 py-4">
+
+                                        <div class="flex items-center justify-end gap-1">
+
+
+                                            <!-- ANALYSE IA -->
+                                            <button
+                                                mat-icon-button
+                                                matTooltip="Analyse IA"
+                                                type="button"
+                                                (click)="openAnalyseIa(device.deviceId)"
+                                                class="device-action-btn text-purple-500 hover:text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
+
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_outline:chart-bar-square'">
+                                                </mat-icon>
+
+                                            </button>
+
+
+                                            <!-- Modifier -->
+                                            <button
+                                                mat-icon-button
+                                                [matTooltip]="t('Modifier')"
+                                                type="button"
+                                                (click)="toggleDetails(device.deviceId)"
+                                                class="device-action-btn device-action-btn--edit text-gray-400 hover:text-indigo-600 transition-colors">
+
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="selectedDevice?.deviceId === device.deviceId
+                                                        ? 'heroicons_solid:chevron-up'
+                                                        : 'heroicons_outline:pencil-square'">
+                                                </mat-icon>
+
+                                            </button>
+
+
+                                            <!-- Supprimer -->
+                                            @if (hasActionPermission(FuseNavigationAction.Delete)) {
+
+                                                <button
+                                                    mat-icon-button
+                                                    [matTooltip]="t('Supprimer')"
+                                                    type="button"
+                                                    (click)="deleteSelectedDevice(device)"
+                                                    class="device-action-btn device-action-btn--delete text-gray-400 hover:text-red-600 transition-colors">
+
+                                                    <mat-icon
+                                                        class="icon-size-5"
+                                                        [svgIcon]="'heroicons_outline:trash'">
+                                                    </mat-icon>
+
+                                                </button>
+
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+
+                                <!-- Details -->
+                                @if (selectedDevice?.deviceId === device.deviceId) {
+
+                                    <tr class="bg-gray-50/50 dark:bg-slate-700/20">
+
+                                        <td colspan="5" class="px-0 py-0">
+
+                                            <ng-container
+                                                *ngTemplateOutlet="rowDetailsTemplate; context: {$implicit: device}">
+                                            </ng-container>
+
+                                        </td>
+
+                                    </tr>
+
+                                }
+
+                            }
+
                         } @else {
-                        <tr>
-                            <td colspan="4" class="py-20 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <mat-icon class="icon-size-16 text-gray-200 dark:text-gray-700"
-                                        [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
-                                    <p class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">{{ t('Aucun
-                                        Dispositif trouvé') }}</p>
-                                </div>
-                            </td>
-                        </tr>
+
+                            <!-- Empty -->
+                            <tr>
+
+                                <td colspan="5" class="py-20 text-center">
+
+                                    <div class="flex flex-col items-center justify-center">
+
+                                        <mat-icon
+                                            class="icon-size-16 text-gray-200 dark:text-gray-700"
+                                            [svgIcon]="'heroicons_outline:cpu-chip'">
+                                        </mat-icon>
+
+                                        <p
+                                            class="mt-4 text-xl font-semibold text-gray-500 dark:text-gray-400">
+
+                                            {{ t('Aucun Dispositif trouvé') }}
+
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
+
 
             <!-- Footer / Pagination -->
             <div
                 class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700">
+
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ t('Affichage') }} <span class="font-medium text-gray-900 dark:text-white">1</span> {{ t('à') }}
-                    <span class="font-medium text-gray-900 dark:text-white">10</span> {{ t('sur') }} <span
-                        class="font-medium text-gray-900 dark:text-white">{{ devicesLength }}</span> {{
-                    t('résultats') }}
+
+                    {{ t('Affichage') }}
+
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        1
+                    </span>
+
+                    {{ t('à') }}
+
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        10
+                    </span>
+
+                    {{ t('sur') }}
+
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        {{ devicesLength }}
+                    </span>
+
+                    {{ t('résultats') }}
+
                 </div>
+
+
                 <div class="flex items-center space-x-2">
-                    <mat-paginator class="bg-transparent" [ngClass]="{'pointer-events-none': isLoading}"
-                        [length]="devicesLength" (page)="SortChange()" [pageSize]="10"
-                        [pageSizeOptions]="[5, 10, 25, 50, 100]" [showFirstLastButtons]="true"></mat-paginator>
+
+                    <mat-paginator
+                        class="bg-transparent"
+                        [ngClass]="{'pointer-events-none': isLoading}"
+                        [length]="devicesLength"
+                        (page)="SortChange()"
+                        [pageSize]="10"
+                        [pageSizeOptions]="[5, 10, 25, 50, 100]"
+                        [showFirstLastButtons]="true">
+                    </mat-paginator>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 
     <!-- Detail template -->
     <ng-template #rowDetailsTemplate let-device>
-        <div class="p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 shadow-inner">
-            <form class="flex flex-col w-full" [formGroup]="selectedDeviceForm">
+
+        <div
+            class="p-6 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 shadow-inner">
+
+            <form
+                class="flex flex-col w-full"
+                [formGroup]="selectedDeviceForm">
+
                 <div class="space-y-4">
+
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+                        <!-- Device name -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Nom
-                                Dispositif')
-                                }}</label>
+
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+
+                                {{ t('Nom Dispositif') }}
+
+                            </label>
+
                             <div class="relative rounded-lg shadow-sm">
-                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
-                                    [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
-                                <input type="text" [formControlName]="'deviceName'"
+
+                                <mat-icon
+                                    class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:cpu-chip'">
+                                </mat-icon>
+
+                                <input
+                                    type="text"
+                                    formControlName="deviceName"
                                     class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+
                             </div>
+
                         </div>
 
+
+                        <!-- Matricule -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{
-                                t('Matricule')
-                                }}</label>
+
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+
+                                {{ t('Matricule') }}
+
+                            </label>
+
                             <div class="relative rounded-lg shadow-sm">
-                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
-                                    [svgIcon]="'heroicons_outline:identification'"></mat-icon>
-                                <input type="text" [formControlName]="'matricule'"
+
+                                <mat-icon
+                                    class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:identification'">
+                                </mat-icon>
+
+                                <input
+                                    type="text"
+                                    formControlName="matricule"
                                     class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+
                             </div>
+
                         </div>
 
+
+                        <!-- Nombre capteurs -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('Nombre
-                                Capteur')
-                                }}</label>
+
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+
+                                {{ t('Nombre Capteur') }}
+
+                            </label>
+
                             <div class="relative rounded-lg shadow-sm">
-                                <mat-icon class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
-                                    [svgIcon]="'heroicons_outline:signal'"></mat-icon>
-                                <input type="number" [formControlName]="'nombreCapteur'"
+
+                                <mat-icon
+                                    class="absolute left-3 top-3.5 text-indigo-500 icon-size-5"
+                                    [svgIcon]="'heroicons_outline:signal'">
+                                </mat-icon>
+
+                                <input
+                                    type="number"
+                                    formControlName="nombreCapteur"
                                     class="block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none">
+
                             </div>
+
                         </div>
 
                     </div>
+
                 </div>
 
+
                 <!-- Save bar -->
-                @if ((hasActionPermission(FuseNavigationAction.Edit) && device.deviceId !== 'new') ||
-                (hasActionPermission(FuseNavigationAction.Add) && device.deviceId === 'new')) {
-                <div
-                    class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-gray-100 dark:border-slate-700">
-                    <button (click)="closeDetails()" type="button"
-                        class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
-                        {{ t('Annuler') }}
-                    </button>
-                    <button (click)="SaveSelectedDevice()" [disabled]="selectedDeviceForm.invalid" type="button"
-                        class="inline-flex items-center px-8 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
-                        style="background-color: #2E6C9F;">
-                        <mat-icon class="icon-size-4 mr-2" [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                        {{ t('Enregistrer Dispositif') }}
-                    </button>
-                </div>
+                @if (
+                    (hasActionPermission(FuseNavigationAction.Edit) && device.deviceId !== 'new') ||
+                    (hasActionPermission(FuseNavigationAction.Add) && device.deviceId === 'new')
+                ) {
+
+                    <div
+                        class="flex items-center justify-end gap-4 mt-8 pt-4 border-t border-gray-100 dark:border-slate-700">
+
+                        <button
+                            (click)="closeDetails()"
+                            type="button"
+                            class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
+
+                            {{ t('Annuler') }}
+
+                        </button>
+
+
+                        <button
+                            (click)="SaveSelectedDevice()"
+                            [disabled]="selectedDeviceForm.invalid"
+                            type="button"
+                            class="inline-flex items-center px-8 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-sm"
+                            style="background-color: #2E6C9F;">
+
+                            <mat-icon
+                                class="icon-size-4 mr-2"
+                                [svgIcon]="'heroicons_outline:check'">
+                            </mat-icon>
+
+                            {{ t('Enregistrer Dispositif') }}
+
+                        </button>
+
+                    </div>
+
                 }
+
             </form>
+
         </div>
+
     </ng-template>
 
 </div>

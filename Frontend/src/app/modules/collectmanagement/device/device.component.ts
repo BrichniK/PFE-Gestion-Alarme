@@ -17,6 +17,7 @@ import {
     UntypedFormGroup,
     Validators,
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FuseConfirmationService } from '../../../../@fuse/services/confirmation';
 import { Device } from '../../../core/device/device.model';
 import { DeviceService } from '../../../core/device/device.service';
@@ -29,7 +30,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { fuseAnimations } from '../../../../@fuse/animations';
-import { ActivatedRoute } from '@angular/router';
 import { FuseNavigationAction } from '../../../../@fuse/components/navigation';
 import { RoleNavigation } from '../../../core/role-utilisateur/role-utilisateur.model';
 import { TranslocoDirective } from '@ngneat/transloco';
@@ -79,7 +79,9 @@ export class DeviceComponent implements OnInit, OnDestroy {
         private _activatedRoute: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
         private _fuseConfirmationService: FuseConfirmationService,
-        private _formBuilder: UntypedFormBuilder
+        private _formBuilder: UntypedFormBuilder,
+        private _router: Router
+
     ) {}
 
     SortChange() {
@@ -94,6 +96,9 @@ export class DeviceComponent implements OnInit, OnDestroy {
             )
             .subscribe();
     }
+    openAnalyseIa(deviceId: string): void {
+    this._router.navigate(['/fichier/analyse-ia', deviceId]);
+}
 
     getDevices() {
         return this._deviceService.GetDevice(

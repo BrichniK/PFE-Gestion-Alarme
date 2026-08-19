@@ -1,84 +1,74 @@
+
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Chat } from 'app/layout/common/quick-chat/quick-chat.types';
-import {
-    BehaviorSubject,
-    map,
-    Observable,
-    of,
-    switchMap,
-    tap,
-    throwError,
-} from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { SettingConfigService } from '../../../core/config/setting-config.service';
 
-@Injectable({ providedIn: 'root' })
+/**
+ * Réponse métier de l'assistant IA.
+ */
+export interface ChatWithAiResponse {
+    message: string;
+    deviceMatricule?: string | null;
+    deviceName?: string | null;
+    riskLevel?: string | null;
+    globalTrend?: string | null;
+    failureRate?: number | null;
+    recommendation?: string | null;
+}
+
+/**
+ * Réponse API complète.
+ *
+ * Le backend retourne :
+ *
+ * {
+ *   success: true,
+ *   message: "",
+ *   statusCode: 200,
+ *   validationErrors: null,
+ *   data: {
+ *      message: "...",
+ *      ...
+ *   }
+ * }
+ */
+export interface ChatWithAiApiResponse {
+    success: boolean;
+    message: string;
+    statusCode: number;
+    validationErrors?: unknown;
+    data: ChatWithAiResponse;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
 export class QuickChatService {
-    private _chat: BehaviorSubject<Chat> = new BehaviorSubject(null);
-    private _chats: BehaviorSubject<Chat[]> = new BehaviorSubject<Chat[]>(null);
 
-    /**
-     * Constructor
-     */
-    constructor(private _httpClient: HttpClient) {}
+    private readonly _httpClient = inject(HttpClient);
+    private readonly _settingConfigService =
+        inject(SettingConfigService);
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Accessors
-    // -----------------------------------------------------------------------------------------------------
+    sendMessage(
+        message: string
+    ): Observable<ChatWithAiApiResponse> {
 
-    /**
-     * Getter for chat
-     */
-    get chat$(): Observable<Chat> {
-        return this._chat.asObservable();
-    }
+        const baseApi =
+            this._settingConfigService.baseApi;
 
-    /**
-     * Getter for chat
-     */
-    get chats$(): Observable<Chat[]> {
-        return this._chats.asObservable();
-    }
+        const url =
+            `${baseApi.replace(/\/$/, '')}/ai/chat`;
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
+        console.log('🤖 IA URL:', url);
+        console.log('🤖 IA message:', message);
 
-    /**
-     * Get chats
-     */
-    getChats(): Observable<any> {
-        return this._httpClient.get<Chat[]>('api/apps/chat/chats').pipe(
-            tap((response: Chat[]) => {
-                this._chats.next(response);
-            })
+        return this._httpClient.post<ChatWithAiApiResponse>(
+            url,
+            {
+                message
+            }
         );
     }
-
-    /**
-     * Get chat
-     *
-     * @param id
-     */
-    getChatById(id: string): Observable<any> {
-        return this._httpClient
-            .get<Chat>('api/apps/chat/chat', { params: { id } })
-            .pipe(
-                map((chat) => {
-                    // Update the chat
-                    this._chat.next(chat);
-
-                    // Return the chat
-                    return chat;
-                }),
-                switchMap((chat) => {
-                    if (!chat) {
-                        return throwError(
-                            'Could not found chat with id of ' + id + '!'
-                        );
-                    }
-
-                    return of(chat);
-                })
-            );
-    }
 }
+

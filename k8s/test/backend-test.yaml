@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: gestionalarme-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
+
+      containers:
+        - name: backend
+          image: brichnik/gestion-alarme-pfe:backend-latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            # Environnement TEST
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Testing
+
+            # SQL Server TEST
+            - name: ConnectionStrings__SqlServerConnection
+              valueFrom:
+                secretKeyRef:
+                  name: gestionalarme-secret
+                  key: ConnectionStrings__SqlServerConnection
+
+            # MQTT TEST
+            - name: Mqtt__Broker
+              value: mqtt-service
+
+            - name: Mqtt__Port
+              value: "1883"
+
+            - name: Mqtt__Username
+              value: admincst
+
+            - name: Mqtt__Password
+              value: Cst_2024*
+
+            - name: Mqtt__ClientId
+              value: CollectManagement-Client-TEST
+
+            - name: Mqtt__Topic
+              value: ALARME/+/+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: gestionalarme-test
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+    - port: 80
+      targetPort: 8080
