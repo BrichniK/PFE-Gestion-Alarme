@@ -1,4 +1,4 @@
-```yaml
+
 # ASP.NET Core (.NET 8)
 # Build + Unit Tests + Coverage + SonarQube + Artifacts
 
@@ -327,4 +327,3 @@ stages:
         pathToPublish: 'Frontend/dist'
         artifactName: 'frontend'
         publishLocation: 'Container'
-```
