@@ -133,6 +133,7 @@ stages:
 
           sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
 
+          sonar.branch.name=main
 
 
 
