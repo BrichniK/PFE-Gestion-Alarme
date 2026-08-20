@@ -1,22 +1,16 @@
 # ASP.NET Core (.NET 8)
 # Build + Unit Tests + Coverage + SonarQube + Artifacts
 
-
 trigger:
 - main
-
 
 pool:
   name: AlertAgent1
 
-
 variables:
   BuildConfiguration: Release
 
-
-
 stages:
-
 
 #========================================================
 # BACKEND
@@ -26,24 +20,21 @@ stages:
 
   displayName: Backend Build
 
-
   jobs:
-
 
   - job: BuildBackend
 
     displayName: Build .NET Backend
 
-
     steps:
-
 
     - checkout: self
       clean: true
 
 
-
+    #====================================================
     # JAVA 17
+    #====================================================
 
     - powershell: |
 
@@ -55,25 +46,20 @@ stages:
 
         java -version
 
-
       displayName: Configure Java 17
 
 
-
+    #====================================================
     # DOTNET 8
+    #====================================================
 
     - task: UseDotNet@2
 
       displayName: Install .NET 8 SDK
 
       inputs:
-
         packageType: sdk
-
         version: 8.x
-
-
-
 
 
     - powershell: |
@@ -84,14 +70,12 @@ stages:
 
         dotnet --version
 
-
       displayName: Environment Check
 
 
-
-
-
+    #====================================================
     # RESTORE
+    #====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -104,12 +88,11 @@ stages:
         projects: Backend/CST.LePoint.sln
 
 
-
-
-
+    #====================================================
     # SONARQUBE PREPARE
+    #====================================================
 
-    - task: SonarQubePrepare@7
+    - task: SonarQubePrepare@5
 
       displayName: SonarQube Prepare
 
@@ -127,18 +110,18 @@ stages:
 
           sonar.sourceEncoding=UTF-8
 
+          sonar.branch.name=
+
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
 
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
 
           sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
 
-          sonar.branch.name=main
 
-
-
-
+    #====================================================
     # BUILD
+    #====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -153,13 +136,14 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --no-restore'
 
 
-
-
-
+    #====================================================
     # TESTS + COVERAGE
+    #====================================================
 
     - task: DotNetCoreCLI@2
+
       displayName: Run Unit Tests + Coverage
+
       inputs:
 
         command: test
@@ -169,40 +153,53 @@ stages:
         publishTestResults: false
 
         arguments: >
+
           --configuration $(BuildConfiguration)
+
           --no-build
+
           --logger "trx;LogFileName=test-results.trx"
+
           --results-directory "$(Build.SourcesDirectory)/TestResults"
+
           --collect:"XPlat Code Coverage"
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+          --
+
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
-
-
-
+    #====================================================
     # CHECK FILES
+    #====================================================
 
     - powershell: |
 
-        Write-Host "TRX"
+        Write-Host "====================================="
+
+        Write-Host "TRX FILES"
+
+        Write-Host "====================================="
 
         Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
 
 
-        Write-Host "Coverage"
+        Write-Host "====================================="
+
+        Write-Host "COVERAGE FILES"
+
+        Write-Host "====================================="
 
         Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
-
 
       displayName: Check Coverage
 
       condition: always()
 
 
-
-
-
-    # PUBLISH TEST
+    #====================================================
+    # PUBLISH TEST RESULTS
+    #====================================================
 
     - task: PublishTestResults@2
 
@@ -219,22 +216,20 @@ stages:
         searchFolder: '$(Build.SourcesDirectory)/TestResults'
 
 
+    #====================================================
+    # SONARQUBE ANALYZE
+    #====================================================
 
-
-
-    # SONAR ANALYZE
-
-    - task: SonarQubeAnalyze@7
+    - task: SonarQubeAnalyze@5
 
       displayName: Sonar Analyze
 
 
-
-
-
+    #====================================================
     # QUALITY GATE
+    #====================================================
 
-    - task: SonarQubePublish@7
+    - task: SonarQubePublish@5
 
       displayName: Quality Gate
 
@@ -243,10 +238,9 @@ stages:
         pollingTimeoutSec: 300
 
 
-
-
-
+    #====================================================
     # PUBLISH API
+    #====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -261,10 +255,9 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
 
 
-
-
-
+    #====================================================
     # BACKEND ARTIFACT
+    #====================================================
 
     - task: PublishBuildArtifacts@1
 
@@ -277,10 +270,6 @@ stages:
         ArtifactName: backend
 
 
-
-
-
-
 # =====================================================
 # FRONTEND ANGULAR
 # =====================================================
@@ -289,20 +278,18 @@ stages:
 
   displayName: Build Angular Frontend
 
-
   jobs:
 
   - job: Build_Angular
 
     displayName: Build Angular Application
 
-
     steps:
 
 
-    # ==========================
+    #====================================================
     # NODE
-    # ==========================
+    #====================================================
 
     - task: UseNode@1
 
@@ -313,33 +300,32 @@ stages:
         version: '22.x'
 
 
-
-    # ==========================
+    #====================================================
     # CLEAN NODE MODULES
-    # ==========================
+    #====================================================
 
     - powershell: |
 
         cd Frontend
 
         if (Test-Path node_modules) {
+
             Remove-Item node_modules -Recurse -Force
+
         }
 
         if (Test-Path package-lock.json) {
-            npm cache clean --force
-        }
 
+            npm cache clean --force
+
+        }
 
       displayName: Clean Angular Dependencies
 
 
-
-
-    # ==========================
+    #====================================================
     # INSTALL
-    # ==========================
-
+    #====================================================
 
     - powershell: |
 
@@ -347,17 +333,12 @@ stages:
 
         npm install --verbose
 
-
       displayName: Install Angular Packages
 
 
-
-
-
-    # ==========================
+    #====================================================
     # VERIFY
-    # ==========================
-
+    #====================================================
 
     - powershell: |
 
@@ -368,13 +349,9 @@ stages:
       displayName: Verify Angular Builder
 
 
-
-
-
-    # ==========================
+    #====================================================
     # BUILD
-    # ==========================
-
+    #====================================================
 
     - powershell: |
 
@@ -382,22 +359,16 @@ stages:
 
         npm run build
 
-
       displayName: Build Angular
 
 
-
-
-
-    # ==========================
+    #====================================================
     # ARTIFACT
-    # ==========================
-
+    #====================================================
 
     - task: PublishBuildArtifacts@1
 
       displayName: Publish Frontend Artifact
-
 
       inputs:
 
