@@ -42,7 +42,7 @@ stages:
 
     - powershell: |
 
-        $javaHome="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
+        $javaHome = "C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
 
         Write-Host "JAVA_HOME = $javaHome"
 
@@ -65,7 +65,7 @@ stages:
 
       inputs:
         packageType: sdk
-        version: 8.x
+        version: '8.x'
 
 
     # ====================================================
@@ -78,22 +78,20 @@ stages:
         Write-Host "ENVIRONMENT"
         Write-Host "=========================================="
 
+        Write-Host ""
         Write-Host "JAVA_HOME:"
         Write-Host $env:JAVA_HOME
 
         Write-Host ""
-
-        Write-Host "Java:"
+        Write-Host "JAVA VERSION:"
         java -version
 
         Write-Host ""
-
-        Write-Host ".NET:"
+        Write-Host ".NET VERSION:"
         dotnet --version
 
         Write-Host ""
-
-        Write-Host "SDK LIST:"
+        Write-Host ".NET SDKs:"
         dotnet --list-sdks
 
       displayName: Environment Check
@@ -105,92 +103,129 @@ stages:
 
     - task: DotNetCoreCLI@2
 
-      displayName: Restore
+      displayName: Restore Backend
 
       inputs:
 
         command: restore
 
-        projects: Backend/CST.LePoint.sln
+        projects: 'Backend/CST.LePoint.sln'
 
 
     # ====================================================
-    # REMOVE SONAR BRANCH VARIABLES
+    # SONAR BRANCH DIAGNOSTIC
     # ====================================================
 
     - powershell: |
 
         Write-Host "=========================================="
-        Write-Host "CHECK SONAR BRANCH CONFIGURATION"
+        Write-Host "SONAR BRANCH DIAGNOSTIC"
         Write-Host "=========================================="
 
         Write-Host ""
-        Write-Host "Azure DevOps branch variables:"
-        Write-Host "BUILD_SOURCEBRANCH = $env:BUILD_SOURCEBRANCH"
-        Write-Host "BUILD_SOURCEBRANCHNAME = $env:BUILD_SOURCEBRANCHNAME"
-        Write-Host "BUILD_SOURCEVERSION = $env:BUILD_SOURCEVERSION"
+        Write-Host "Azure DevOps variables"
+        Write-Host "------------------------------------------"
+
+        Write-Host "BUILD_SOURCEBRANCH:"
+        Write-Host "$env:BUILD_SOURCEBRANCH"
 
         Write-Host ""
-        Write-Host "Checking repository for sonar.branch.name..."
+        Write-Host "BUILD_SOURCEBRANCHNAME:"
+        Write-Host "$env:BUILD_SOURCEBRANCHNAME"
 
-        $matches = Get-ChildItem `
+        Write-Host ""
+        Write-Host "BUILD_REASON:"
+        Write-Host "$env:BUILD_REASON"
+
+        Write-Host ""
+        Write-Host "SYSTEM_PULLREQUEST_SOURCEBRANCH:"
+        Write-Host "$env:SYSTEM_PULLREQUEST_SOURCEBRANCH"
+
+        Write-Host ""
+        Write-Host "SYSTEM_PULLREQUEST_TARGETBRANCH:"
+        Write-Host "$env:SYSTEM_PULLREQUEST_TARGETBRANCH"
+
+
+        Write-Host ""
+        Write-Host "=========================================="
+        Write-Host "SEARCH sonar.branch.name IN REPOSITORY"
+        Write-Host "=========================================="
+
+        $found = $false
+
+        $files = Get-ChildItem `
           "$(Build.SourcesDirectory)" `
           -Recurse `
           -File `
-          -ErrorAction SilentlyContinue |
-          Select-String `
-          -Pattern "sonar\.branch\.name" `
-          -SimpleMatch:$false `
           -ErrorAction SilentlyContinue
 
-        if ($matches) {
+        foreach ($file in $files) {
 
-            Write-Host ""
-            Write-Host "WARNING: sonar.branch.name FOUND:"
-            Write-Host ""
+            try {
 
-            $matches | ForEach-Object {
-                Write-Host "$($_.Path):$($_.LineNumber) $($_.Line)"
-            }
-
-            Write-Host ""
-            Write-Host "Removing sonar.branch.name from sonar-project.properties if present..."
-
-            $sonarFiles = Get-ChildItem `
-              "$(Build.SourcesDirectory)" `
-              -Recurse `
-              -Filter "sonar-project.properties" `
-              -File `
-              -ErrorAction SilentlyContinue
-
-            foreach ($file in $sonarFiles) {
-
-                Write-Host "Processing: $($file.FullName)"
-
-                $content = Get-Content $file.FullName
-
-                $content = $content |
-                  Where-Object {
-                    $_ -notmatch '^\s*sonar\.branch\.name\s*='
-                  }
-
-                Set-Content `
+                $matches = Select-String `
                   -Path $file.FullName `
-                  -Value $content `
-                  -Encoding UTF8
+                  -Pattern "sonar\.branch\.name" `
+                  -ErrorAction SilentlyContinue
+
+                if ($matches) {
+
+                    $found = $true
+
+                    foreach ($match in $matches) {
+
+                        Write-Host ""
+                        Write-Host "FOUND:"
+                        Write-Host "File: $($match.Path)"
+                        Write-Host "Line: $($match.LineNumber)"
+                        Write-Host "Content: $($match.Line)"
+                    }
+                }
+
+            }
+            catch {
+                # Ignore binary/unreadable files
             }
         }
-        else {
 
-            Write-Host "No sonar.branch.name found in repository."
+        if (-not $found) {
+
+            Write-Host ""
+            Write-Host "NO sonar.branch.name FOUND IN REPOSITORY"
+
         }
+
 
         Write-Host ""
         Write-Host "=========================================="
-        Write-Host "SONAR BRANCH CONFIGURATION CHECK DONE"
+        Write-Host "SONAR ENVIRONMENT VARIABLES"
         Write-Host "=========================================="
 
-      displayName: Remove Sonar Branch Configuration
+        $sonarVariables = Get-ChildItem Env: |
+          Where-Object {
+              $_.Name -match "SONAR"
+          } |
+          Sort-Object Name
+
+        if ($sonarVariables) {
+
+            $sonarVariables |
+              Format-Table Name, Value -AutoSize
+
+        }
+        else {
+
+            Write-Host "NO SONAR ENVIRONMENT VARIABLES FOUND"
+
+        }
+
+
+        Write-Host ""
+        Write-Host "=========================================="
+        Write-Host "DIAGNOSTIC FINISHED"
+        Write-Host "=========================================="
+
+      displayName: Diagnose Sonar Branch
 
 
     # ====================================================
@@ -203,13 +238,13 @@ stages:
 
       inputs:
 
-        SonarQube: SonarQubeConnection
+        SonarQube: 'SonarQubeConnection'
 
-        scannerMode: dotnet
+        scannerMode: 'dotnet'
 
-        projectKey: GestionAlarmePFE
+        projectKey: 'GestionAlarmePFE'
 
-        projectName: GestionAlarmePFE
+        projectName: 'GestionAlarmePFE'
 
         extraProperties: |
 
@@ -234,7 +269,7 @@ stages:
 
         command: build
 
-        projects: Backend/CST.LePoint.sln
+        projects: 'Backend/CST.LePoint.sln'
 
         arguments: '--configuration $(BuildConfiguration) --no-restore'
 
@@ -249,8 +284,10 @@ stages:
         Write-Host "RUN UNIT TESTS + COVERAGE"
         Write-Host "=========================================="
 
+        $testProject = "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj"
+
         dotnet test `
-          "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
+          $testProject `
           --configuration $(BuildConfiguration) `
           --no-build `
           --logger "trx;LogFileName=test-results.trx" `
@@ -266,6 +303,7 @@ stages:
 
         if ($exitCode -ne 0) {
 
+            Write-Host ""
             Write-Host "=========================================="
             Write-Host "UNIT TESTS FAILED"
             Write-Host "=========================================="
@@ -293,14 +331,27 @@ stages:
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
-            Get-ChildItem `
+            $trxFiles = Get-ChildItem `
               "$(Build.SourcesDirectory)/TestResults" `
               -Recurse `
-              -Filter *.trx |
-              ForEach-Object {
-                  Write-Host $_.FullName
-              }
+              -Filter "*.trx" `
+              -ErrorAction SilentlyContinue
+
+            if ($trxFiles) {
+
+                foreach ($file in $trxFiles) {
+
+                    Write-Host $file.FullName
+                }
+
+            }
+            else {
+
+                Write-Host "NO TRX FILE FOUND"
+
+            }
         }
+
 
         Write-Host ""
         Write-Host "=========================================="
@@ -309,24 +360,41 @@ stages:
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
-            Get-ChildItem `
+            $coverageFiles = Get-ChildItem `
               "$(Build.SourcesDirectory)/TestResults" `
               -Recurse `
-              -Filter coverage.opencover.xml |
-              ForEach-Object {
-                  Write-Host $_.FullName
-              }
+              -Filter "coverage.opencover.xml" `
+              -ErrorAction SilentlyContinue
+
+            if ($coverageFiles) {
+
+                foreach ($file in $coverageFiles) {
+
+                    Write-Host $file.FullName
+                }
+
+            }
+            else {
+
+                Write-Host "NO OPENCOVER FILE FOUND"
+
+            }
         }
+
 
         Write-Host ""
         Write-Host "=========================================="
         Write-Host "ALL TEST RESULT FILES"
         Write-Host "=========================================="
 
-        Get-ChildItem `
-          "$(Build.SourcesDirectory)/TestResults" `
-          -Recurse `
-          -ErrorAction SilentlyContinue
+        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
+
+            Get-ChildItem `
+              "$(Build.SourcesDirectory)/TestResults" `
+              -Recurse `
+              -ErrorAction SilentlyContinue
+
+        }
 
       displayName: Check Coverage Files
 
@@ -364,16 +432,16 @@ stages:
 
 
     # ====================================================
-    # QUALITY GATE
+    # SONAR QUALITY GATE
     # ====================================================
 
     - task: SonarQubePublish@7
 
-      displayName: Quality Gate
+      displayName: SonarQube Quality Gate
 
       inputs:
 
-        pollingTimeoutSec: 300
+        pollingTimeoutSec: '300'
 
 
     # ====================================================
@@ -388,7 +456,7 @@ stages:
 
         command: publish
 
-        projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
+        projects: 'Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj'
 
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
 
@@ -399,13 +467,13 @@ stages:
 
     - task: PublishBuildArtifacts@1
 
-      displayName: Backend Artifact
+      displayName: Publish Backend Artifact
 
       inputs:
 
-        PathtoPublish: $(Build.ArtifactStagingDirectory)/Backend
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/Backend'
 
-        ArtifactName: backend
+        ArtifactName: 'backend'
 
 
 # ========================================================
@@ -426,6 +494,14 @@ stages:
 
 
     # ====================================================
+    # CHECKOUT
+    # ====================================================
+
+    - checkout: self
+      clean: true
+
+
+    # ====================================================
     # NODE 22
     # ====================================================
 
@@ -436,6 +512,23 @@ stages:
       inputs:
 
         version: '22.x'
+
+
+    # ====================================================
+    # NODE ENVIRONMENT
+    # ====================================================
+
+    - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "NODE ENVIRONMENT"
+        Write-Host "=========================================="
+
+        node --version
+
+        npm --version
+
+      displayName: Node Environment Check
 
 
     # ====================================================
@@ -464,7 +557,7 @@ stages:
 
 
     # ====================================================
-    # INSTALL
+    # INSTALL ANGULAR PACKAGES
     # ====================================================
 
     - powershell: |
@@ -484,13 +577,16 @@ stages:
 
         Set-Location Frontend
 
-        Write-Host "Angular packages:"
+        Write-Host "=========================================="
+        Write-Host "ANGULAR CORE"
+        Write-Host "=========================================="
 
         npm list @angular/core
 
         Write-Host ""
-
-        Write-Host "Angular builder:"
+        Write-Host "=========================================="
+        Write-Host "ANGULAR BUILD TOOL"
+        Write-Host "=========================================="
 
         npm list @angular-devkit/build-angular
 
@@ -520,6 +616,6 @@ stages:
 
       inputs:
 
-        pathToPublish: Frontend/dist
+        pathToPublish: 'Frontend/dist'
 
-        artifactName: frontend
+        artifactName: 'frontend'
