@@ -110,8 +110,6 @@ stages:
 
           sonar.sourceEncoding=UTF-8
 
-          sonar.branch.name=
-
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
 
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
@@ -140,33 +138,32 @@ stages:
     # TESTS + COVERAGE
     #====================================================
 
-    - task: DotNetCoreCLI@2
+    - powershell: |
+
+        Write-Host "====================================="
+        Write-Host "RUN UNIT TESTS + COVERAGE"
+        Write-Host "====================================="
+
+        dotnet test `
+          "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
+          --configuration $(BuildConfiguration) `
+          --no-build `
+          --logger "trx;LogFileName=test-results.trx" `
+          --results-directory "$(Build.SourcesDirectory)/TestResults" `
+          --collect:"XPlat Code Coverage" `
+          -- `
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Unit tests failed."
+            exit $LASTEXITCODE
+        }
+
+        Write-Host "====================================="
+        Write-Host "UNIT TESTS + COVERAGE COMPLETED"
+        Write-Host "====================================="
 
       displayName: Run Unit Tests + Coverage
-
-      inputs:
-
-        command: test
-
-        projects: Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj
-
-        publishTestResults: false
-
-        arguments: >
-
-          --configuration $(BuildConfiguration)
-
-          --no-build
-
-          --logger "trx;LogFileName=test-results.trx"
-
-          --results-directory "$(Build.SourcesDirectory)/TestResults"
-
-          --collect:"XPlat Code Coverage"
-
-          --
-
-          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
 
     #====================================================
@@ -176,21 +173,31 @@ stages:
     - powershell: |
 
         Write-Host "====================================="
-
         Write-Host "TRX FILES"
-
         Write-Host "====================================="
 
-        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
+        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
+
+            Get-ChildItem `
+              "$(Build.SourcesDirectory)/TestResults" `
+              -Recurse `
+              -Filter *.trx
+
+        }
 
 
         Write-Host "====================================="
-
         Write-Host "COVERAGE FILES"
-
         Write-Host "====================================="
 
-        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
+        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
+
+            Get-ChildItem `
+              "$(Build.SourcesDirectory)/TestResults" `
+              -Recurse `
+              -Filter coverage.opencover.xml
+
+        }
 
       displayName: Check Coverage
 
