@@ -68,7 +68,9 @@ stages:
       displayName: Install .NET 8 SDK
 
       inputs:
+
         packageType: sdk
+
         version: 8.x
 
 
@@ -82,8 +84,9 @@ stages:
         Write-Host "ENVIRONMENT CHECK"
         Write-Host "=========================================="
 
+        Write-Host ""
         Write-Host "JAVA_HOME:"
-        echo $env:JAVA_HOME
+        Write-Host $env:JAVA_HOME
 
         Write-Host ""
         Write-Host "JAVA VERSION:"
@@ -116,23 +119,48 @@ stages:
 
 
     # ====================================================
-    # CHECK SONAR / BRANCH VARIABLES
+    # DEBUG AZURE DEVOPS / SONAR
     # ====================================================
 
     - powershell: |
 
-        Write-Host "=========================================="
-        Write-Host "SONAR / BRANCH VARIABLES"
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
+        Write-Host "AZURE DEVOPS BRANCH INFORMATION"
+        Write-Host "===================================================="
+
+        Write-Host "Build.SourceBranch      = $(Build.SourceBranch)"
+        Write-Host "Build.SourceBranchName  = $(Build.SourceBranchName)"
+        Write-Host "Build.Repository.Name   = $(Build.Repository.Name)"
+        Write-Host "Build.Repository.ID     = $(Build.Repository.ID)"
+        Write-Host "Build.SourceVersion     = $(Build.SourceVersion)"
+        Write-Host "Build.Reason            = $(Build.Reason)"
+
+        Write-Host ""
+        Write-Host "===================================================="
+        Write-Host "SONAR ENVIRONMENT VARIABLES"
+        Write-Host "===================================================="
 
         Get-ChildItem Env: |
           Where-Object {
-            $_.Name -match "SONAR|BUILD_SOURCE|BUILD_REPOSITORY|BRANCH"
+            $_.Name -match "SONAR"
           } |
           Sort-Object Name |
           Format-Table Name, Value -AutoSize
 
-      displayName: Check Sonar and Branch Variables
+        Write-Host ""
+        Write-Host "===================================================="
+        Write-Host "BRANCH ENVIRONMENT VARIABLES"
+        Write-Host "===================================================="
+
+        Get-ChildItem Env: |
+          Where-Object {
+            $_.Name -match "BRANCH"
+          } |
+          Sort-Object Name |
+          Format-Table Name, Value -AutoSize
+
+      displayName: Debug Sonar Configuration
 
 
     # ====================================================
@@ -187,9 +215,10 @@ stages:
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "RUN UNIT TESTS + COVERAGE"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         dotnet test `
           "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
@@ -203,17 +232,19 @@ stages:
 
         if ($LASTEXITCODE -ne 0) {
 
-            Write-Host "=========================================="
+            Write-Host ""
+            Write-Host "===================================================="
             Write-Host "UNIT TESTS FAILED"
             Write-Host "Exit code: $LASTEXITCODE"
-            Write-Host "=========================================="
+            Write-Host "===================================================="
 
             exit $LASTEXITCODE
         }
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "UNIT TESTS + COVERAGE COMPLETED"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
       displayName: Run Unit Tests + Coverage
 
@@ -224,9 +255,10 @@ stages:
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "TEST RESULTS DIRECTORY"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
@@ -243,9 +275,9 @@ stages:
 
 
         Write-Host ""
-        Write-Host "=========================================="
+        Write-Host "===================================================="
         Write-Host "TRX FILES"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
@@ -258,9 +290,9 @@ stages:
 
 
         Write-Host ""
-        Write-Host "=========================================="
+        Write-Host "===================================================="
         Write-Host "COVERAGE FILES"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
@@ -385,9 +417,10 @@ stages:
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "CLEAN ANGULAR DEPENDENCIES"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         cd Frontend
 
@@ -411,14 +444,15 @@ stages:
 
 
     # ====================================================
-    # INSTALL ANGULAR PACKAGES
+    # INSTALL
     # ====================================================
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "INSTALL ANGULAR PACKAGES"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         cd Frontend
 
@@ -428,14 +462,15 @@ stages:
 
 
     # ====================================================
-    # VERIFY ANGULAR BUILDER
+    # VERIFY
     # ====================================================
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "VERIFY ANGULAR BUILDER"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         cd Frontend
 
@@ -445,14 +480,15 @@ stages:
 
 
     # ====================================================
-    # BUILD ANGULAR
+    # BUILD
     # ====================================================
 
     - powershell: |
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "BUILD ANGULAR"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
         cd Frontend
 
@@ -465,9 +501,10 @@ stages:
             exit $LASTEXITCODE
         }
 
-        Write-Host "=========================================="
+        Write-Host ""
+        Write-Host "===================================================="
         Write-Host "ANGULAR BUILD COMPLETED"
-        Write-Host "=========================================="
+        Write-Host "===================================================="
 
       displayName: Build Angular
 
