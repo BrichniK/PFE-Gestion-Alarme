@@ -92,7 +92,7 @@ stages:
     # SONARQUBE PREPARE
     #====================================================
 
-    - task: SonarQubePrepare@5
+    - task: SonarQubePrepare@7
 
       displayName: SonarQube Prepare
 
@@ -220,7 +220,7 @@ stages:
     # SONARQUBE ANALYZE
     #====================================================
 
-    - task: SonarQubeAnalyze@5
+    - task: SonarQubeAnalyze@7
 
       displayName: Sonar Analyze
 
@@ -229,7 +229,7 @@ stages:
     # QUALITY GATE
     #====================================================
 
-    - task: SonarQubePublish@5
+    - task: SonarQubePublish@7
 
       displayName: Quality Gate
 
