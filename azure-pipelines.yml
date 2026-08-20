@@ -1,280 +1,160 @@
 # ASP.NET Core (.NET 8)
 # Build + Unit Tests + Coverage + SonarQube + Artifacts
 
-
 trigger:
 - main
-
 
 pool:
   name: AlertAgent1
 
-
 variables:
   BuildConfiguration: Release
 
-
-
 stages:
-
 
 #========================================================
 # BACKEND
 #========================================================
 
 - stage: Backend
-
   displayName: Backend Build
 
-
   jobs:
-
-
   - job: BuildBackend
-
     displayName: Build .NET Backend
 
-
     steps:
-
-
     - checkout: self
       clean: true
 
-
-
     # JAVA 17
-
     - powershell: |
-
-        $javaHome="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
-
+        $javaHome = "C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
         Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
-
-        Write-Host "##vso[task.setvariable variable=PATH]$javaHome\bin;$env:PATH"
-
+        Write-Host "##vso[task.prependpath]$javaHome\bin"
         java -version
-
-
       displayName: Configure Java 17
 
 
 
     # DOTNET 8
+- task: UseDotNet@2
+  displayName: Install .NET 8 SDK
+  inputs:
+    packageType: sdk
+    version: 8.x
+
+- powershell: |
+    echo $env:JAVA_HOME
+    java -version
+    dotnet --version
+  displayName: Environment Check
+
+# RESTORE
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: Backend/CST.LePoint.sln
+
+
+
+
+
+# SONARQUBE PREPARE
+- task: SonarQubePrepare@7
+  displayName: SonarQube Prepare
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
+  inputs:
+    SonarQube: SonarQubeConnection
+    scannerMode: dotnet
+    projectKey: GestionAlarmePFE
+    projectName: GestionAlarmePFE
+    extraProperties: |
+      sonar.sourceEncoding=UTF-8
+      sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
+      sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
+      sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
+
+
+
+
+
+# BUILD
+- task: DotNetCoreCLI@2
+  displayName: Build Backend
+  inputs:
+    command: build
+    projects: Backend/CST.LePoint.sln
+    arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+# TESTS + COVERAGE
+- task: DotNetCoreCLI@2
+  displayName: Run Unit Tests + Coverage
+  inputs:
+    command: test
+    projects: Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj
+    publishTestResults: false
+    arguments: >
+      --configuration $(BuildConfiguration)
+      --no-build
+      --logger "trx;LogFileName=test-results.trx"
+      --results-directory "$(Build.SourcesDirectory)/TestResults"
+      --collect:"XPlat Code Coverage"
+      -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+
+
+
+# CHECK FILES
+- powershell: |
+    Write-Host "TRX"
+    Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
+
+    Write-Host "Coverage"
+    Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
+  displayName: Check Coverage
+  condition: always()
+
+# PUBLISH TEST
+- task: PublishTestResults@2
+  displayName: Publish Tests
+  condition: always()
+  inputs:
+    testResultsFormat: VSTest
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(Build.SourcesDirectory)/TestResults'
+
+# SONAR ANALYZE
+- task: SonarQubeAnalyze@7
+  displayName: Sonar Analyze
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
+
+# QUALITY GATE
+- task: SonarQubePublish@7
+  displayName: Quality Gate
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
+  inputs:
+    pollingTimeoutSec: 300
+
+
+
 
-    - task: UseDotNet@2
 
-      displayName: Install .NET 8 SDK
-
-      inputs:
-
-        packageType: sdk
-
-        version: 8.x
-
-
-
-
-
-    - powershell: |
-
-        echo $env:JAVA_HOME
-
-        java -version
-
-        dotnet --version
-
-
-      displayName: Environment Check
-
-
-
-
-
-    # RESTORE
-
-    - task: DotNetCoreCLI@2
-
-      displayName: Restore
-
-      inputs:
-
-        command: restore
-
-        projects: Backend/CST.LePoint.sln
-
-
-
-
-
-    # SONARQUBE PREPARE
-
-    - task: SonarQubePrepare@7
-
-      displayName: SonarQube Prepare
-
-      inputs:
-
-        SonarQube: SonarQubeConnection
-
-        scannerMode: dotnet
-
-        projectKey: GestionAlarmePFE
-
-        projectName: GestionAlarmePFE
-
-        extraProperties: |
-
-          sonar.sourceEncoding=UTF-8
-
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
-
-          sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
-
-          sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
-
-
-
-
-
-    # BUILD
-
-    - task: DotNetCoreCLI@2
-
-      displayName: Build Backend
-
-      inputs:
-
-        command: build
-
-        projects: Backend/CST.LePoint.sln
-
-        arguments: '--configuration $(BuildConfiguration) --no-restore'
-
-
-
-
-
-    # TESTS + COVERAGE
-
-    - task: DotNetCoreCLI@2
-      displayName: Run Unit Tests + Coverage
-      inputs:
-
-        command: test
-
-        projects: Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj
-
-        publishTestResults: false
-
-        arguments: >
-          --configuration $(BuildConfiguration)
-          --no-build
-          --logger "trx;LogFileName=test-results.trx"
-          --results-directory "$(Build.SourcesDirectory)/TestResults"
-          --collect:"XPlat Code Coverage"
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
-
-
-
-
-    # CHECK FILES
-
-    - powershell: |
-
-        Write-Host "TRX"
-
-        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
-
-
-        Write-Host "Coverage"
-
-        Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
-
-
-      displayName: Check Coverage
-
-      condition: always()
-
-
-
-
-
-    # PUBLISH TEST
-
-    - task: PublishTestResults@2
-
-      displayName: Publish Tests
-
-      condition: always()
-
-      inputs:
-
-        testResultsFormat: VSTest
-
-        testResultsFiles: '**/*.trx'
-
-        searchFolder: '$(Build.SourcesDirectory)/TestResults'
-
-
-
-
-
-    # SONAR ANALYZE
-
-    - task: SonarQubeAnalyze@7
-
-      displayName: Sonar Analyze
-
-
-
-
-
-    # QUALITY GATE
-
-    - task: SonarQubePublish@7
-
-      displayName: Quality Gate
-
-      inputs:
-
-        pollingTimeoutSec: 300
-
-
-
-
-
-    # PUBLISH API
-
-    - task: DotNetCoreCLI@2
-
-      displayName: Publish API
-
-      inputs:
-
-        command: publish
-
-        projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
-
-        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
-
-
-
-
-
-    # BACKEND ARTIFACT
-
-    - task: PublishBuildArtifacts@1
-
-      displayName: Backend Artifact
-
-      inputs:
-
-        PathtoPublish: $(Build.ArtifactStagingDirectory)/Backend
-
-        ArtifactName: backend
-
+# PUBLISH API
+- task: DotNetCoreCLI@2
+  displayName: Publish API
+  inputs:
+    command: publish
+    projects: Backend/src/CollectManagement.ms/CollectManagement.WebAPI/CollectManagement.WebAPI.csproj
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
+
+# BACKEND ARTIFACT
+- task: PublishBuildArtifacts@1
+  displayName: Backend Artifact
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/Backend'
+    ArtifactName: backend
 
 
 
