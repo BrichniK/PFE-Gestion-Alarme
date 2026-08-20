@@ -1,3 +1,4 @@
+```yaml
 # ASP.NET Core (.NET 8)
 # Build + Unit Tests + Coverage + SonarQube + Artifacts
 
@@ -46,7 +47,6 @@ stages:
         Write-Host "##vso[task.prependpath]$javaHome\bin"
 
         java -version
-
       displayName: 'Configure Java 17'
 
     # ====================================================
@@ -74,7 +74,6 @@ stages:
         Write-Host ""
         Write-Host ".NET version:"
         dotnet --version
-
       displayName: 'Environment Check'
 
     # ====================================================
@@ -93,24 +92,16 @@ stages:
 
     - task: SonarQubePrepare@7
       displayName: 'SonarQube Prepare'
-      condition: and(
-        succeeded(),
-        eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-        ne(variables['Build.Reason'], 'PullRequest')
-      )
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
         SonarQube: 'SonarQubeConnection'
         scannerMode: 'dotnet'
         projectKey: 'GestionAlarmePFE'
         projectName: 'GestionAlarmePFE'
-
         extraProperties: |
           sonar.sourceEncoding=UTF-8
-
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
-
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
-
           sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
 
     # ====================================================
@@ -140,8 +131,7 @@ stages:
           --logger "trx;LogFileName=test-results.trx"
           --results-directory "$(Build.SourcesDirectory)/TestResults"
           --collect:"XPlat Code Coverage"
-          --
-          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     # ====================================================
     # CHECK TEST + COVERAGE FILES
@@ -153,10 +143,7 @@ stages:
         Write-Host "=========================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
-            Get-ChildItem `
-              "$(Build.SourcesDirectory)/TestResults" `
-              -Recurse `
-              -Filter *.trx
+            Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
         }
         else {
             Write-Host "TestResults directory not found."
@@ -168,15 +155,11 @@ stages:
         Write-Host "=========================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
-            Get-ChildItem `
-              "$(Build.SourcesDirectory)/TestResults" `
-              -Recurse `
-              -Filter coverage.opencover.xml
+            Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
         }
         else {
             Write-Host "TestResults directory not found."
         }
-
       displayName: 'Check Test and Coverage Files'
       condition: always()
 
@@ -200,25 +183,17 @@ stages:
 
     - task: SonarQubeAnalyze@7
       displayName: 'SonarQube Analyze'
-      condition: and(
-        succeeded(),
-        eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-        ne(variables['Build.Reason'], 'PullRequest')
-      )
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
         jdkversion: 'JAVA_HOME_17_X64'
 
     # ====================================================
-    # SONARQUBE QUALITY GATE
+    # SONARQUBE PUBLISH / QUALITY GATE
     # ====================================================
 
     - task: SonarQubePublish@7
       displayName: 'SonarQube Publish / Quality Gate'
-      condition: and(
-        succeeded(),
-        eq(variables['Build.SourceBranch'], 'refs/heads/main'),
-        ne(variables['Build.Reason'], 'PullRequest')
-      )
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
         pollingTimeoutSec: '300'
 
@@ -283,7 +258,6 @@ stages:
     - powershell: |
         node --version
         npm --version
-
       displayName: 'Check Node.js and npm'
 
     # ====================================================
@@ -300,7 +274,6 @@ stages:
 
         Write-Host "Cleaning npm cache..."
         npm cache clean --force
-
       displayName: 'Clean Angular Dependencies'
 
     # ====================================================
@@ -311,7 +284,6 @@ stages:
         Set-Location Frontend
 
         npm install --verbose
-
       displayName: 'Install Angular Packages'
 
     # ====================================================
@@ -322,7 +294,6 @@ stages:
         Set-Location Frontend
 
         npm list @angular-devkit/build-angular
-
       displayName: 'Verify Angular Builder'
 
     # ====================================================
@@ -333,7 +304,6 @@ stages:
         Set-Location Frontend
 
         npm run build
-
       displayName: 'Build Angular'
 
     # ====================================================
@@ -343,10 +313,7 @@ stages:
     - powershell: |
         Write-Host "Angular dist contents:"
 
-        Get-ChildItem `
-          "$(Build.SourcesDirectory)/Frontend/dist" `
-          -Recurse
-
+        Get-ChildItem "$(Build.SourcesDirectory)/Frontend/dist" -Recurse
       displayName: 'Check Angular Build'
       condition: succeeded()
 
@@ -360,3 +327,4 @@ stages:
         pathToPublish: 'Frontend/dist'
         artifactName: 'frontend'
         publishLocation: 'Container'
+```
