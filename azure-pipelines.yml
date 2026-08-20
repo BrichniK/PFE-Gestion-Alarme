@@ -115,6 +115,57 @@ stages:
 
 
     # ====================================================
+    # DEBUG AZURE DEVOPS BRANCH
+    # ====================================================
+
+    - powershell: |
+
+        Write-Host ""
+        Write-Host "======================================================"
+        Write-Host "AZURE DEVOPS BRANCH DEBUG"
+        Write-Host "======================================================"
+
+        Write-Host ""
+        Write-Host "Build.SourceBranch:"
+        Write-Host "$(Build.SourceBranch)"
+
+        Write-Host ""
+        Write-Host "Build.SourceBranchName:"
+        Write-Host "$(Build.SourceBranchName)"
+
+        Write-Host ""
+        Write-Host "Build.SourceVersion:"
+        Write-Host "$(Build.SourceVersion)"
+
+        Write-Host ""
+        Write-Host "Build.Repository.Name:"
+        Write-Host "$(Build.Repository.Name)"
+
+        Write-Host ""
+        Write-Host "Build.Repository.Uri:"
+        Write-Host "$(Build.Repository.Uri)"
+
+        Write-Host ""
+        Write-Host "Build.Repository.Provider:"
+        Write-Host "$(Build.Repository.Provider)"
+
+        Write-Host ""
+        Write-Host "System.PullRequest.SourceBranch:"
+        Write-Host "$(System.PullRequest.SourceBranch)"
+
+        Write-Host ""
+        Write-Host "System.PullRequest.TargetBranch:"
+        Write-Host "$(System.PullRequest.TargetBranch)"
+
+        Write-Host ""
+        Write-Host "======================================================"
+        Write-Host "END AZURE DEVOPS BRANCH DEBUG"
+        Write-Host "======================================================"
+
+      displayName: DEBUG Azure DevOps Branch
+
+
+    # ====================================================
     # SONARQUBE PREPARE
     # ====================================================
 
@@ -151,19 +202,18 @@ stages:
 
         Write-Host ""
         Write-Host "======================================================"
-        Write-Host "DEBUG SONAR GENERATED CONFIGURATION"
+        Write-Host "SONAR GENERATED CONFIGURATION"
         Write-Host "======================================================"
 
         $sonarConfig = "$(Agent.BuildDirectory)\.sonarqube\out\sonar-project.properties"
 
         Write-Host ""
-        Write-Host "Sonar configuration file:"
+        Write-Host "Configuration file:"
         Write-Host $sonarConfig
-
-        Write-Host ""
 
         if (Test-Path $sonarConfig) {
 
+            Write-Host ""
             Write-Host "======================================================"
             Write-Host "FULL SONAR CONFIGURATION"
             Write-Host "======================================================"
@@ -172,7 +222,7 @@ stages:
 
             Write-Host ""
             Write-Host "======================================================"
-            Write-Host "BRANCH RELATED PROPERTIES"
+            Write-Host "BRANCH PROPERTIES"
             Write-Host "======================================================"
 
             $branchProperties = Select-String `
@@ -184,7 +234,7 @@ stages:
             if ($branchProperties) {
 
                 Write-Host ""
-                Write-Host "WARNING: BRANCH CONFIGURATION FOUND"
+                Write-Host "WARNING: BRANCH PROPERTY FOUND"
                 Write-Host ""
 
                 $branchProperties | ForEach-Object {
@@ -198,28 +248,16 @@ stages:
                 Write-Host "NO BRANCH PROPERTY FOUND"
             }
 
-            Write-Host ""
-            Write-Host "======================================================"
-            Write-Host "SONAR PROJECT PROPERTIES"
-            Write-Host "======================================================"
-
-            Select-String `
-                -Path $sonarConfig `
-                -Pattern "sonar.project|sonar.source|sonar.exclusions|sonar.cs" `
-                -CaseSensitive:$false `
-                -ErrorAction SilentlyContinue
-
         }
         else {
 
             Write-Host ""
             Write-Host "ERROR: SONAR CONFIGURATION FILE NOT FOUND"
-            Write-Host ""
         }
 
         Write-Host ""
         Write-Host "======================================================"
-        Write-Host "CHECK ENVIRONMENT VARIABLES"
+        Write-Host "SONAR ENVIRONMENT VARIABLES"
         Write-Host "======================================================"
 
         Get-ChildItem Env: |
@@ -232,8 +270,6 @@ stages:
             }
 
         Write-Host ""
-        Write-Host "======================================================"
-        Write-Host "END SONAR DEBUG"
         Write-Host "======================================================"
 
       displayName: DEBUG Sonar Generated Configuration
@@ -283,18 +319,13 @@ stages:
 
         if ($exitCode -ne 0) {
 
-            Write-Host ""
-            Write-Host "======================================================"
             Write-Host "UNIT TESTS FAILED"
-            Write-Host "======================================================"
 
             exit $exitCode
         }
 
         Write-Host ""
-        Write-Host "======================================================"
         Write-Host "UNIT TESTS + COVERAGE COMPLETED"
-        Write-Host "======================================================"
 
       displayName: Run Unit Tests + Coverage
 
@@ -330,7 +361,6 @@ stages:
             }
         }
 
-
         Write-Host ""
         Write-Host "======================================================"
         Write-Host "OPENCOVER FILES"
@@ -355,21 +385,6 @@ stages:
 
                 Write-Host "NO OPENCOVER FILE FOUND"
             }
-        }
-
-
-        Write-Host ""
-        Write-Host "======================================================"
-        Write-Host "ALL TEST RESULT FILES"
-        Write-Host "======================================================"
-
-        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
-
-            Get-ChildItem `
-                "$(Build.SourcesDirectory)/TestResults" `
-                -Recurse `
-                -ErrorAction SilentlyContinue
-
         }
 
       displayName: Check Coverage Files
@@ -467,7 +482,6 @@ stages:
     displayName: Build Angular Application
 
     steps:
-
 
     # ====================================================
     # NODE 22
