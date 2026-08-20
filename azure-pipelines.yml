@@ -12,9 +12,9 @@ variables:
 
 stages:
 
-#========================================================
+# ========================================================
 # BACKEND
-#========================================================
+# ========================================================
 
 - stage: Backend
 
@@ -28,17 +28,27 @@ stages:
 
     steps:
 
+    # ====================================================
+    # CHECKOUT
+    # ====================================================
+
     - checkout: self
       clean: true
 
 
-    #====================================================
+    # ====================================================
     # JAVA 17
-    #====================================================
+    # ====================================================
 
     - powershell: |
 
         $javaHome="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
+
+        Write-Host "=========================================="
+        Write-Host "CONFIGURE JAVA 17"
+        Write-Host "=========================================="
+
+        Write-Host "JAVA_HOME = $javaHome"
 
         Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
 
@@ -49,9 +59,9 @@ stages:
       displayName: Configure Java 17
 
 
-    #====================================================
+    # ====================================================
     # DOTNET 8
-    #====================================================
+    # ====================================================
 
     - task: UseDotNet@2
 
@@ -62,20 +72,37 @@ stages:
         version: 8.x
 
 
+    # ====================================================
+    # ENVIRONMENT CHECK
+    # ====================================================
+
     - powershell: |
 
+        Write-Host "=========================================="
+        Write-Host "ENVIRONMENT CHECK"
+        Write-Host "=========================================="
+
+        Write-Host "JAVA_HOME:"
         echo $env:JAVA_HOME
 
+        Write-Host ""
+        Write-Host "JAVA VERSION:"
         java -version
 
+        Write-Host ""
+        Write-Host ".NET VERSION:"
         dotnet --version
+
+        Write-Host ""
+        Write-Host ".NET INFO:"
+        dotnet --info
 
       displayName: Environment Check
 
 
-    #====================================================
+    # ====================================================
     # RESTORE
-    #====================================================
+    # ====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -88,9 +115,29 @@ stages:
         projects: Backend/CST.LePoint.sln
 
 
-    #====================================================
+    # ====================================================
+    # CHECK SONAR / BRANCH VARIABLES
+    # ====================================================
+
+    - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "SONAR / BRANCH VARIABLES"
+        Write-Host "=========================================="
+
+        Get-ChildItem Env: |
+          Where-Object {
+            $_.Name -match "SONAR|BUILD_SOURCE|BUILD_REPOSITORY|BRANCH"
+          } |
+          Sort-Object Name |
+          Format-Table Name, Value -AutoSize
+
+      displayName: Check Sonar and Branch Variables
+
+
+    # ====================================================
     # SONARQUBE PREPARE
-    #====================================================
+    # ====================================================
 
     - task: SonarQubePrepare@7
 
@@ -117,9 +164,9 @@ stages:
           sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
 
 
-    #====================================================
+    # ====================================================
     # BUILD
-    #====================================================
+    # ====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -134,15 +181,15 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --no-restore'
 
 
-    #====================================================
+    # ====================================================
     # TESTS + COVERAGE
-    #====================================================
+    # ====================================================
 
     - powershell: |
 
-        Write-Host "====================================="
+        Write-Host "=========================================="
         Write-Host "RUN UNIT TESTS + COVERAGE"
-        Write-Host "====================================="
+        Write-Host "=========================================="
 
         dotnet test `
           "Backend/tests/CollectManagement.Tests/CollectManagement.Tests.csproj" `
@@ -155,26 +202,50 @@ stages:
           DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "Unit tests failed."
+
+            Write-Host "=========================================="
+            Write-Host "UNIT TESTS FAILED"
+            Write-Host "Exit code: $LASTEXITCODE"
+            Write-Host "=========================================="
+
             exit $LASTEXITCODE
         }
 
-        Write-Host "====================================="
+        Write-Host "=========================================="
         Write-Host "UNIT TESTS + COVERAGE COMPLETED"
-        Write-Host "====================================="
+        Write-Host "=========================================="
 
       displayName: Run Unit Tests + Coverage
 
 
-    #====================================================
-    # CHECK FILES
-    #====================================================
+    # ====================================================
+    # CHECK TEST / COVERAGE FILES
+    # ====================================================
 
     - powershell: |
 
-        Write-Host "====================================="
+        Write-Host "=========================================="
+        Write-Host "TEST RESULTS DIRECTORY"
+        Write-Host "=========================================="
+
+        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
+
+            Get-ChildItem `
+              "$(Build.SourcesDirectory)/TestResults" `
+              -Recurse
+
+        }
+        else {
+
+            Write-Host "TestResults directory does not exist."
+
+        }
+
+
+        Write-Host ""
+        Write-Host "=========================================="
         Write-Host "TRX FILES"
-        Write-Host "====================================="
+        Write-Host "=========================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
@@ -186,9 +257,10 @@ stages:
         }
 
 
-        Write-Host "====================================="
+        Write-Host ""
+        Write-Host "=========================================="
         Write-Host "COVERAGE FILES"
-        Write-Host "====================================="
+        Write-Host "=========================================="
 
         if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
 
@@ -204,9 +276,9 @@ stages:
       condition: always()
 
 
-    #====================================================
+    # ====================================================
     # PUBLISH TEST RESULTS
-    #====================================================
+    # ====================================================
 
     - task: PublishTestResults@2
 
@@ -223,18 +295,18 @@ stages:
         searchFolder: '$(Build.SourcesDirectory)/TestResults'
 
 
-    #====================================================
+    # ====================================================
     # SONARQUBE ANALYZE
-    #====================================================
+    # ====================================================
 
     - task: SonarQubeAnalyze@7
 
       displayName: Sonar Analyze
 
 
-    #====================================================
+    # ====================================================
     # QUALITY GATE
-    #====================================================
+    # ====================================================
 
     - task: SonarQubePublish@7
 
@@ -245,9 +317,9 @@ stages:
         pollingTimeoutSec: 300
 
 
-    #====================================================
+    # ====================================================
     # PUBLISH API
-    #====================================================
+    # ====================================================
 
     - task: DotNetCoreCLI@2
 
@@ -262,9 +334,9 @@ stages:
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/Backend'
 
 
-    #====================================================
+    # ====================================================
     # BACKEND ARTIFACT
-    #====================================================
+    # ====================================================
 
     - task: PublishBuildArtifacts@1
 
@@ -277,9 +349,9 @@ stages:
         ArtifactName: backend
 
 
-# =====================================================
+# ========================================================
 # FRONTEND ANGULAR
-# =====================================================
+# ========================================================
 
 - stage: Frontend_Build
 
@@ -294,9 +366,9 @@ stages:
     steps:
 
 
-    #====================================================
-    # NODE
-    #====================================================
+    # ====================================================
+    # NODE 22
+    # ====================================================
 
     - task: UseNode@1
 
@@ -307,21 +379,29 @@ stages:
         version: '22.x'
 
 
-    #====================================================
+    # ====================================================
     # CLEAN NODE MODULES
-    #====================================================
+    # ====================================================
 
     - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "CLEAN ANGULAR DEPENDENCIES"
+        Write-Host "=========================================="
 
         cd Frontend
 
         if (Test-Path node_modules) {
+
+            Write-Host "Removing node_modules..."
 
             Remove-Item node_modules -Recurse -Force
 
         }
 
         if (Test-Path package-lock.json) {
+
+            Write-Host "Cleaning npm cache..."
 
             npm cache clean --force
 
@@ -330,11 +410,15 @@ stages:
       displayName: Clean Angular Dependencies
 
 
-    #====================================================
-    # INSTALL
-    #====================================================
+    # ====================================================
+    # INSTALL ANGULAR PACKAGES
+    # ====================================================
 
     - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "INSTALL ANGULAR PACKAGES"
+        Write-Host "=========================================="
 
         cd Frontend
 
@@ -343,11 +427,15 @@ stages:
       displayName: Install Angular Packages
 
 
-    #====================================================
-    # VERIFY
-    #====================================================
+    # ====================================================
+    # VERIFY ANGULAR BUILDER
+    # ====================================================
 
     - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "VERIFY ANGULAR BUILDER"
+        Write-Host "=========================================="
 
         cd Frontend
 
@@ -356,22 +444,37 @@ stages:
       displayName: Verify Angular Builder
 
 
-    #====================================================
-    # BUILD
-    #====================================================
+    # ====================================================
+    # BUILD ANGULAR
+    # ====================================================
 
     - powershell: |
+
+        Write-Host "=========================================="
+        Write-Host "BUILD ANGULAR"
+        Write-Host "=========================================="
 
         cd Frontend
 
         npm run build
 
+        if ($LASTEXITCODE -ne 0) {
+
+            Write-Host "Angular build failed."
+
+            exit $LASTEXITCODE
+        }
+
+        Write-Host "=========================================="
+        Write-Host "ANGULAR BUILD COMPLETED"
+        Write-Host "=========================================="
+
       displayName: Build Angular
 
 
-    #====================================================
-    # ARTIFACT
-    #====================================================
+    # ====================================================
+    # FRONTEND ARTIFACT
+    # ====================================================
 
     - task: PublishBuildArtifacts@1
 
