@@ -25,6 +25,10 @@ stages:
 
     steps:
 
+    # ====================================================
+    # CHECKOUT
+    # ====================================================
+
     - checkout: self
       clean: true
 
@@ -35,11 +39,16 @@ stages:
     - powershell: |
         $javaHome = "C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
 
+        Write-Host "Configuring JAVA_HOME..."
+        Write-Host "JAVA_HOME = $javaHome"
+
         Write-Host "##vso[task.setvariable variable=JAVA_HOME]$javaHome"
         Write-Host "##vso[task.prependpath]$javaHome\bin"
 
+        Write-Host ""
         Write-Host "Java version:"
         java -version
+
       displayName: 'Configure Java 17'
 
     # ====================================================
@@ -57,6 +66,11 @@ stages:
     # ====================================================
 
     - powershell: |
+        Write-Host "========================================"
+        Write-Host "ENVIRONMENT CHECK"
+        Write-Host "========================================"
+
+        Write-Host ""
         Write-Host "JAVA_HOME:"
         Write-Host $env:JAVA_HOME
 
@@ -67,6 +81,11 @@ stages:
         Write-Host ""
         Write-Host ".NET version:"
         dotnet --version
+
+        Write-Host ""
+        Write-Host "PowerShell:"
+        $PSVersionTable.PSVersion
+
       displayName: 'Environment Check'
 
     # ====================================================
@@ -81,7 +100,7 @@ stages:
 
     # ====================================================
     # SONARQUBE PREPARE
-    # MAIN ONLY - NOT PULL REQUEST
+    # MAIN ONLY / NOT PULL REQUEST
     # ====================================================
 
     - task: SonarQubePrepare@7
@@ -97,6 +116,78 @@ stages:
           sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
           sonar.cs.vstest.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/*.trx
+
+    # ====================================================
+    # SONAR DEBUG - AFTER PREPARE
+    # ====================================================
+
+    - powershell: |
+        Write-Host "========================================"
+        Write-Host "SONARQUBE DEBUG - AFTER PREPARE"
+        Write-Host "========================================"
+
+        $sonarDir = "$(Build.SourcesDirectory)\.sonarqube"
+
+        Write-Host ""
+        Write-Host "Sonar directory:"
+        Write-Host $sonarDir
+
+        if (Test-Path $sonarDir) {
+
+            Write-Host ""
+            Write-Host ".sonarqube directory EXISTS"
+
+            Write-Host ""
+            Write-Host "Searching for sonar.branch.name..."
+            
+            $files = Get-ChildItem $sonarDir -Recurse -File -ErrorAction SilentlyContinue
+
+            foreach ($file in $files) {
+                try {
+                    $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
+
+                    if ($content -match "sonar\.branch\.name") {
+                        Write-Host ""
+                        Write-Host "========================================"
+                        Write-Host "FOUND sonar.branch.name"
+                        Write-Host "File:"
+                        Write-Host $file.FullName
+                        Write-Host "========================================"
+
+                        $matches = Select-String `
+                            -Path $file.FullName `
+                            -Pattern "sonar\.branch\.name" `
+                            -SimpleMatch `
+                            -ErrorAction SilentlyContinue
+
+                        if ($matches) {
+                            $matches | ForEach-Object {
+                                Write-Host $_.Line
+                            }
+                        }
+                    }
+                }
+                catch {
+                }
+            }
+
+        }
+        else {
+            Write-Host ".sonarqube directory NOT FOUND"
+        }
+
+        Write-Host ""
+        Write-Host "========================================"
+        Write-Host "AZURE DEVOPS BUILD VARIABLES"
+        Write-Host "========================================"
+
+        Write-Host "Build.SourceBranch = $(Build.SourceBranch)"
+        Write-Host "Build.SourceBranchName = $(Build.SourceBranchName)"
+        Write-Host "Build.Reason = $(Build.Reason)"
+        Write-Host "Build.Repository.Name = $(Build.Repository.Name)"
+
+      displayName: 'DEBUG SonarQube Branch Configuration'
+      condition: always()
 
     # ====================================================
     # BUILD
@@ -125,36 +216,102 @@ stages:
           --logger "trx;LogFileName=test-results.trx"
           --results-directory "$(Build.SourcesDirectory)/TestResults"
           --collect:"XPlat Code Coverage"
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
     # ====================================================
-    # CHECK TEST AND COVERAGE FILES
+    # CHECK TESTS AND COVERAGE
     # ====================================================
 
     - powershell: |
         Write-Host "========================================"
-        Write-Host "TRX FILES"
+        Write-Host "TEST AND COVERAGE FILES"
         Write-Host "========================================"
 
-        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
-            Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter *.trx
+        $testResults = "$(Build.SourcesDirectory)\TestResults"
+
+        if (Test-Path $testResults) {
+
+            Write-Host ""
+            Write-Host "TRX files:"
+            Get-ChildItem `
+                $testResults `
+                -Recurse `
+                -Filter *.trx `
+                -ErrorAction SilentlyContinue
+
+            Write-Host ""
+            Write-Host "OpenCover files:"
+            Get-ChildItem `
+                $testResults `
+                -Recurse `
+                -Filter coverage.opencover.xml `
+                -ErrorAction SilentlyContinue
+
         }
         else {
-            Write-Host "TestResults directory not found."
+
+            Write-Host ""
+            Write-Host "WARNING: TestResults directory does not exist."
+
         }
+
+      displayName: 'DEBUG Test and Coverage Files'
+      condition: always()
+
+    # ====================================================
+    # DEBUG SONAR COVERAGE PATHS
+    # ====================================================
+
+    - powershell: |
+        Write-Host "========================================"
+        Write-Host "SONAR COVERAGE DEBUG"
+        Write-Host "========================================"
 
         Write-Host ""
-        Write-Host "========================================"
-        Write-Host "COVERAGE FILES"
-        Write-Host "========================================"
+        Write-Host "Expected TRX:"
+        Write-Host "$(Build.SourcesDirectory)\TestResults"
 
-        if (Test-Path "$(Build.SourcesDirectory)/TestResults") {
-            Get-ChildItem "$(Build.SourcesDirectory)/TestResults" -Recurse -Filter coverage.opencover.xml
-        }
-        else {
-            Write-Host "TestResults directory not found."
-        }
-      displayName: 'Check Test and Coverage Files'
+        Write-Host ""
+        Write-Host "Searching entire source directory for TRX..."
+
+        Get-ChildItem `
+            "$(Build.SourcesDirectory)" `
+            -Recurse `
+            -Filter *.trx `
+            -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                Write-Host $_.FullName
+            }
+
+        Write-Host ""
+        Write-Host "Searching entire source directory for OpenCover..."
+
+        Get-ChildItem `
+            "$(Build.SourcesDirectory)" `
+            -Recurse `
+            -Filter coverage.opencover.xml `
+            -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                Write-Host $_.FullName
+            }
+
+        Write-Host ""
+        Write-Host "Searching agent temp directory for coverage..."
+
+        Get-ChildItem `
+            "$(Agent.TempDirectory)" `
+            -Recurse `
+            -ErrorAction SilentlyContinue |
+            Where-Object {
+                $_.Name -eq "coverage.opencover.xml" -or
+                $_.Extension -eq ".trx"
+            } |
+            ForEach-Object {
+                Write-Host $_.FullName
+            }
+
+      displayName: 'DEBUG Sonar Coverage Files'
       condition: always()
 
     # ====================================================
@@ -183,8 +340,85 @@ stages:
         failIfCoverageEmpty: false
 
     # ====================================================
+    # SONARQUBE DEBUG - BEFORE ANALYZE
+    # ====================================================
+
+    - powershell: |
+        Write-Host "========================================"
+        Write-Host "SONARQUBE DEBUG - BEFORE ANALYZE"
+        Write-Host "========================================"
+
+        $propertiesFile = "$(Build.SourcesDirectory)\.sonarqube\out\sonar-project.properties"
+
+        Write-Host ""
+        Write-Host "Properties file:"
+        Write-Host $propertiesFile
+
+        if (Test-Path $propertiesFile) {
+
+            Write-Host ""
+            Write-Host "sonar-project.properties EXISTS"
+
+            Write-Host ""
+            Write-Host "Relevant Sonar properties:"
+
+            Get-Content $propertiesFile |
+                Where-Object {
+                    $_ -match "^sonar\.(projectKey|projectName|branch|sourceEncoding|cs\.)"
+                } |
+                ForEach-Object {
+                    Write-Host $_
+                }
+
+            Write-Host ""
+            Write-Host "========================================"
+            Write-Host "CHECKING sonar.branch.name"
+            Write-Host "========================================"
+
+            $branchProperty = Get-Content $propertiesFile |
+                Where-Object {
+                    $_ -match "^sonar\.branch\.name="
+                }
+
+            if ($branchProperty) {
+                Write-Host ""
+                Write-Host "WARNING: sonar.branch.name IS PRESENT:"
+                Write-Host $branchProperty
+            }
+            else {
+                Write-Host ""
+                Write-Host "OK: sonar.branch.name is NOT present."
+            }
+
+        }
+        else {
+
+            Write-Host ""
+            Write-Host "ERROR: sonar-project.properties NOT FOUND."
+
+        }
+
+        Write-Host ""
+        Write-Host "========================================"
+        Write-Host "BUILD INFORMATION"
+        Write-Host "========================================"
+
+        Write-Host "SourceBranch:"
+        Write-Host "$(Build.SourceBranch)"
+
+        Write-Host ""
+        Write-Host "SourceBranchName:"
+        Write-Host "$(Build.SourceBranchName)"
+
+        Write-Host ""
+        Write-Host "BuildReason:"
+        Write-Host "$(Build.Reason)"
+
+      displayName: 'DEBUG Sonar Properties Before Analyze'
+      condition: always()
+
+    # ====================================================
     # SONARQUBE ANALYZE
-    # MAIN ONLY - NOT PULL REQUEST
     # ====================================================
 
     - task: SonarQubeAnalyze@7
@@ -195,7 +429,6 @@ stages:
 
     # ====================================================
     # SONARQUBE PUBLISH / QUALITY GATE
-    # MAIN ONLY - NOT PULL REQUEST
     # ====================================================
 
     - task: SonarQubePublish@7
@@ -241,6 +474,10 @@ stages:
 
     steps:
 
+    # ====================================================
+    # CHECKOUT
+    # ====================================================
+
     - checkout: self
       clean: true
 
@@ -258,16 +495,24 @@ stages:
     # ====================================================
 
     - powershell: |
+        Write-Host "========================================"
+        Write-Host "NODE / NPM CHECK"
+        Write-Host "========================================"
+
         node --version
         npm --version
+
       displayName: 'Check Node and NPM'
 
     # ====================================================
-    # CLEAN NODE MODULES
+    # CLEAN ANGULAR DEPENDENCIES
     # ====================================================
 
     - powershell: |
         Set-Location Frontend
+
+        Write-Host "Current directory:"
+        Get-Location
 
         if (Test-Path node_modules) {
             Write-Host "Removing node_modules..."
@@ -276,6 +521,7 @@ stages:
 
         Write-Host "Cleaning npm cache..."
         npm cache clean --force
+
       displayName: 'Clean Angular Dependencies'
 
     # ====================================================
@@ -285,18 +531,26 @@ stages:
     - powershell: |
         Set-Location Frontend
 
+        Write-Host "Installing Angular packages..."
         npm install --verbose
+
       displayName: 'Install Angular Packages'
 
     # ====================================================
-    # VERIFY ANGULAR BUILDER
+    # VERIFY ANGULAR
     # ====================================================
 
     - powershell: |
         Set-Location Frontend
 
+        Write-Host "Angular version:"
+        npx ng version
+
+        Write-Host ""
+        Write-Host "Angular builder:"
         npm list @angular-devkit/build-angular
-      displayName: 'Verify Angular Builder'
+
+      displayName: 'Verify Angular Installation'
 
     # ====================================================
     # BUILD ANGULAR
@@ -305,7 +559,9 @@ stages:
     - powershell: |
         Set-Location Frontend
 
+        Write-Host "Building Angular application..."
         npm run build
+
       displayName: 'Build Angular'
 
     # ====================================================
@@ -313,14 +569,29 @@ stages:
     # ====================================================
 
     - powershell: |
-        Write-Host "Angular dist content:"
+        Write-Host "========================================"
+        Write-Host "ANGULAR DIST CHECK"
+        Write-Host "========================================"
 
-        if (Test-Path "Frontend/dist") {
-            Get-ChildItem "Frontend/dist" -Recurse
+        $dist = "$(Build.SourcesDirectory)\Frontend\dist"
+
+        if (Test-Path $dist) {
+
+            Write-Host ""
+            Write-Host "Angular dist exists:"
+            Write-Host $dist
+
+            Write-Host ""
+            Write-Host "Contents:"
+            Get-ChildItem $dist -Recurse
+
         }
         else {
+
             Write-Error "Frontend/dist directory was not created."
+
         }
+
       displayName: 'Check Angular Build'
 
     # ====================================================
