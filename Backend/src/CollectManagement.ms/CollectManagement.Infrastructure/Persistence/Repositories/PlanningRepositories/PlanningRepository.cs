@@ -47,20 +47,19 @@ public class PlanningRepository : RepositoryBase<Planning>, IPlanningRepository
                     ps.Shift.Label.Contains(search))
             );
 
-        var orderBy = where
-            .OrderByDescending(o => o.Date);
+        IOrderedQueryable<Planning> orderBy;
 
-        var prop = TypeDescriptor
-            .GetProperties(typeof(Planning))
-            .Find(sort ?? "Date", true);
-
-        if (prop is not null && order == "asc")
-            orderBy = where.OrderBy(o =>
-                EF.Property<Planning>(o, prop.DisplayName));
-
-        if (prop is not null && order == "desc")
-            orderBy = where.OrderByDescending(o =>
-                EF.Property<Planning>(o, prop.DisplayName));
+        if (string.Equals(sort, "Date", StringComparison.OrdinalIgnoreCase))
+        {
+            orderBy = string.Equals(order, "asc", StringComparison.OrdinalIgnoreCase)
+                ? where.OrderBy(o => o.Date)
+                : where.OrderByDescending(o => o.Date);
+        }
+        else
+        {
+            // Tri par défaut
+            orderBy = where.OrderByDescending(o => o.Date);
+        }
 
         var countAsync = await where
             .CountAsync(cancellationToken)
