@@ -357,7 +357,7 @@ stages:
       displayName: 'SonarQube Analyze'
 
       inputs:
-        jdkversion: 'JAVA_HOME'
+        jdkversion: 'JAVA_HOME_17_X64'
 
 
     # ====================================================
