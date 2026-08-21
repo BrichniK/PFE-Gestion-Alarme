@@ -136,7 +136,7 @@ stages:
 
           sonar.sourceEncoding=UTF-8
 
-          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**
+          sonar.exclusions=**/bin/**,**/obj/**,**/Migrations/**,**/TestResults/**,**/CoverageReport/**,**/coverage-report/**
 
           sonar.cs.opencover.reportsPaths=$(Build.SourcesDirectory)/TestResults/**/coverage.opencover.xml
 
