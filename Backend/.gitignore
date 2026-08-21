@@ -5,3 +5,10 @@ riderModule.iml
 /_ReSharper.Caches/
 src/CollectManagement.ms/CollectManagement.WebAPI/appsettings.json
 src/CollectManagement.ms/CollectManagement.WebAPI/appsettings.Development.json
+# Rider / JetBrains user settings
+*.DotSettings.user
+
+# Test results and code coverage
+**/TestResults/
+*.coverage
+*.cobertura.xml
